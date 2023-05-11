@@ -1,13 +1,13 @@
 import boto3
 
 def lambda_handler(event, context):
-    
+
     # Create an IAM client
     iam = boto3.client('iam')
-    
+
     # Get all IAM groups
     groups = iam.list_groups()
-    
+
     # Loop through each group and add policy if not already attached
     for group in groups['Groups']:
         group_name = group['GroupName']

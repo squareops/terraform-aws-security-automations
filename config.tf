@@ -1,4 +1,4 @@
-# 2.5 – Ensure AWS Config is enabled 
+# 2.5 – Ensure AWS Config is enabled
 
 data "aws_iam_policy_document" "recorder_assume_role_policy" {
   statement {
