@@ -31,4 +31,6 @@ override.tf.json
 .terraformrc
 terraform.rc
 
-*.html
+#Igonre rendered zip files
+**/.zip
+.zip

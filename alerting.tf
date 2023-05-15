@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       test     = "StringEquals"
       variable = "AWS:SourceOwner"
 
-      values = ["${var.aws_account_id}"]
+      values = ["${data.aws_caller_identity.current.account_id}"]
     }
 
     effect = "Allow"
@@ -51,13 +51,13 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       test     = "StringEquals"
       variable = "AWS:SourceOwner"
 
-      values = ["${var.aws_account_id}"]
+      values = ["${data.aws_caller_identity.current.account_id}"]
     }
     condition {
       test     = "ArnLike"
       variable = "AWS:SourceArn"
 
-      values = ["arn:aws:cloudwatch:${var.region}:${var.aws_account_id}:alarm:*"]
+      values = ["arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:*"]
     }
     effect = "Allow"
 
@@ -77,7 +77,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
 resource "aws_sns_topic_subscription" "sms" {
   topic_arn = aws_sns_topic.trail-unauthorised.arn
   protocol  = "email"
-  endpoint  = var.endpoint
+  endpoint  = var.email
 }
 # 1.1 – Avoid the use of the "root" account
 resource "aws_cloudwatch_log_metric_filter" "aws_cis_1_1_avoid_the_use_of_root_account" {
@@ -111,7 +111,7 @@ resource "aws_cloudwatch_metric_alarm" "aws_cis_1_1_avoid_the_use_of_root_accoun
   tags                      = var.tags
 }
 
-# 3.1 – Ensure a log metric filter and alarm exist for unauthorized API calls 
+# 3.1 – Ensure a log metric filter and alarm exist for unauthorized API calls
 resource "aws_cloudwatch_log_metric_filter" "unauthorized_api_calls" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "UnauthorizedAPICalls"
@@ -141,7 +141,7 @@ resource "aws_cloudwatch_metric_alarm" "unauthorized_api_calls" {
   tags                      = var.tags
 }
 
-# 3.2 – Ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA 
+# 3.2 – Ensure a log metric filter and alarm exist for AWS Management Console sign-in without MFA
 resource "aws_cloudwatch_log_metric_filter" "no_mfa_console_signin" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "NoMFAConsoleSignin"
@@ -171,7 +171,7 @@ resource "aws_cloudwatch_metric_alarm" "no_mfa_console_signin" {
   tags                      = var.tags
 }
 
-# 3.3 – Ensure a log metric filter and alarm exist for usage of "root" account 
+# 3.3 – Ensure a log metric filter and alarm exist for usage of "root" account
 resource "aws_cloudwatch_log_metric_filter" "root_usage" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "RootUsage"
@@ -201,7 +201,7 @@ resource "aws_cloudwatch_metric_alarm" "root_usage" {
   tags                      = var.tags
 }
 
-# 3.4 – Ensure a log metric filter and alarm exist for IAM policy changes 
+# 3.4 – Ensure a log metric filter and alarm exist for IAM policy changes
 resource "aws_cloudwatch_log_metric_filter" "iam_changes" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "IAMChanges"
@@ -261,7 +261,7 @@ resource "aws_cloudwatch_metric_alarm" "cloudtrail_cfg_changes" {
   tags                      = var.tags
 }
 
-# 3.6 – Ensure a log metric filter and alarm exist for AWS Management Console authentication failures 
+# 3.6 – Ensure a log metric filter and alarm exist for AWS Management Console authentication failures
 resource "aws_cloudwatch_log_metric_filter" "console_signin_failures" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "ConsoleSigninFailures"
@@ -291,7 +291,7 @@ resource "aws_cloudwatch_metric_alarm" "console_signin_failures" {
   tags                      = var.tags
 }
 
-# 3.7 – Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs 
+# 3.7 – Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs
 resource "aws_cloudwatch_log_metric_filter" "disable_or_delete_cmk" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "DisableOrDeleteCMK"
@@ -321,7 +321,7 @@ resource "aws_cloudwatch_metric_alarm" "disable_or_delete_cmk" {
   tags                      = var.tags
 }
 
-# 3.8 – Ensure a log metric filter and alarm exist for S3 bucket policy changes 
+# 3.8 – Ensure a log metric filter and alarm exist for S3 bucket policy changes
 resource "aws_cloudwatch_log_metric_filter" "s3_bucket_policy_changes" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "S3BucketPolicyChanges"
@@ -351,7 +351,7 @@ resource "aws_cloudwatch_metric_alarm" "s3_bucket_policy_changes" {
   tags                      = var.tags
 }
 
-# 3.9 – Ensure a log metric filter and alarm exist for AWS Config configuration changes 
+# 3.9 – Ensure a log metric filter and alarm exist for AWS Config configuration changes
 resource "aws_cloudwatch_log_metric_filter" "aws_config_changes" {
   count = var.alerting_enabled ? 1 : 0
 
@@ -385,7 +385,7 @@ resource "aws_cloudwatch_metric_alarm" "aws_config_changes" {
   tags = var.tags
 }
 
-# 3.10 – Ensure a log metric filter and alarm exist for security group changes 
+# 3.10 – Ensure a log metric filter and alarm exist for security group changes
 resource "aws_cloudwatch_log_metric_filter" "security_group_changes" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "SecurityGroupChanges"
@@ -415,7 +415,7 @@ resource "aws_cloudwatch_metric_alarm" "security_group_changes" {
   tags                      = var.tags
 }
 
-# 3.11 – Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL) 
+# 3.11 – Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL)
 resource "aws_cloudwatch_log_metric_filter" "nacl_changes" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "NACLChanges"
@@ -459,7 +459,7 @@ resource "aws_cloudwatch_log_metric_filter" "network_gw_changes" {
   }
 }
 
-# 3.12 – Ensure a log metric filter and alarm exist for changes to network gateways 
+# 3.12 – Ensure a log metric filter and alarm exist for changes to network gateways
 resource "aws_cloudwatch_metric_alarm" "network_gw_changes" {
   count                     = var.alerting_enabled ? 1 : 0
   alarm_name                = "CIS-3.12-NetworkGatewayChanges"
@@ -489,7 +489,7 @@ resource "aws_cloudwatch_log_metric_filter" "route_table_changes" {
   }
 }
 
-# 3.13 – Ensure a log metric filter and alarm exist for route table changes 
+# 3.13 – Ensure a log metric filter and alarm exist for route table changes
 resource "aws_cloudwatch_metric_alarm" "route_table_changes" {
   count                     = var.alerting_enabled ? 1 : 0
   alarm_name                = "CIS-3.13-RouteTableChanges"
@@ -507,7 +507,7 @@ resource "aws_cloudwatch_metric_alarm" "route_table_changes" {
   tags                      = var.tags
 }
 
-# 3.14 – Ensure a log metric filter and alarm exist for VPC changes 
+# 3.14 – Ensure a log metric filter and alarm exist for VPC changes
 resource "aws_cloudwatch_log_metric_filter" "vpc_changes" {
   count          = var.alerting_enabled ? 1 : 0
   name           = "VPCChanges"

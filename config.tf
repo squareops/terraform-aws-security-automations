@@ -1,4 +1,4 @@
-# 2.5 – Ensure AWS Config is enabled 
+# 2.5 – Ensure AWS Config is enabled
 
 data "aws_iam_policy_document" "recorder_assume_role_policy" {
   statement {
@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "recorder_publish_policy" {
   depends_on = [aws_s3_bucket.audit[0]]
   statement {
     actions   = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.audit[0].arn}/config/AWSLogs/${var.aws_account_id}/*"]
+    resources = ["${aws_s3_bucket.audit[0].arn}/config/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
 
     condition {
       test     = "StringLike"

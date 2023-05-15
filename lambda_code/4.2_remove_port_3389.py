@@ -3,7 +3,7 @@ import boto3
 def lambda_handler(event, context):
     ec2 = boto3.client('ec2')
     groups = ec2.describe_security_groups()
-    
+
     for group in groups['SecurityGroups']:
         for rule in group['IpPermissions']:
             if 'FromPort' in rule and rule['FromPort'] == 3389:

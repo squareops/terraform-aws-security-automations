@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 data "aws_iam_policy_document" "audit_log" {
   count = var.s3_enabled ? 1 : 0
 
@@ -21,7 +23,7 @@ data "aws_iam_policy_document" "audit_log" {
       identifiers = ["config.amazonaws.com"]
     }
     resources = [
-      "${aws_s3_bucket.audit[0].arn}/config/AWSLogs/${var.aws_account_id}/Config/*"
+      "${aws_s3_bucket.audit[0].arn}/config/AWSLogs/${data.aws_caller_identity.current.account_id}/Config/*"
     ]
     condition {
       test     = "StringEquals"
@@ -47,7 +49,7 @@ data "aws_iam_policy_document" "audit_log" {
       identifiers = ["cloudtrail.amazonaws.com"]
     }
     resources = [
-      "${aws_s3_bucket.audit[0].arn}/cloudtrail/AWSLogs/${var.aws_account_id}/*"
+      "${aws_s3_bucket.audit[0].arn}/cloudtrail/AWSLogs/${data.aws_caller_identity.current.account_id}/*"
     ]
     condition {
       test     = "StringEquals"
@@ -65,25 +67,32 @@ resource "aws_s3_bucket_policy" "audit_log" {
 }
 
 resource "aws_s3_bucket" "access_log" {
-  count  = var.s3_enabled ? 1 : 0
-  bucket = "${var.name}-access-logs-skaf"
+  count         = var.s3_enabled ? 1 : 0
+  bucket        = format("%s-access-logs-%s", var.name, data.aws_caller_identity.current.account_id)
   force_destroy = true
   tags          = var.tags
 }
-resource "aws_s3_bucket_acl" "access_log" {
-  count  = var.s3_enabled ? 1 : 0
+resource "aws_s3_bucket_ownership_controls" "access_log" {
   bucket = aws_s3_bucket.access_log[0].id
-  acl    = "log-delivery-write"
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+resource "aws_s3_bucket_acl" "access_log" {
+  depends_on = [aws_s3_bucket_ownership_controls.access_log]
+  count      = var.s3_enabled ? 1 : 0
+  bucket     = aws_s3_bucket.access_log[0].id
+  acl        = "log-delivery-write"
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "access_log" {
-   count  = var.s3_enabled ? 1 : 0
-   bucket = aws_s3_bucket.access_log[0].bucket
-    rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+  count  = var.s3_enabled ? 1 : 0
+  bucket = aws_s3_bucket.access_log[0].bucket
+  rule {
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
   }
+}
 
 # 2.3 – Ensure the S3 bucket CloudTrail logs to is not publicly accessible
 # 2.6 – Ensure S3 bucket access logging is enabled on the CloudTrail S3 bucket
@@ -99,26 +108,32 @@ resource "aws_s3_bucket_public_access_block" "access_log" {
 }
 
 resource "aws_s3_bucket" "audit" {
-  count  = var.s3_enabled ? 1 : 0
-  bucket = "${var.name}-audit-logs-skaf"
+  count         = var.s3_enabled ? 1 : 0
+  bucket        = format("%s-audit-logs-%s", var.name, data.aws_caller_identity.current.account_id)
   force_destroy = true
-  tags = var.tags
+  tags          = var.tags
 }
-
-resource "aws_s3_bucket_acl" "audit" {
-  count  = var.s3_enabled ? 1 : 0
+resource "aws_s3_bucket_ownership_controls" "audit" {
   bucket = aws_s3_bucket.audit[0].id
-  acl    = "private"
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
+}
+resource "aws_s3_bucket_acl" "audit" {
+  depends_on = [aws_s3_bucket_ownership_controls.audit]
+  count      = var.s3_enabled ? 1 : 0
+  bucket     = aws_s3_bucket.audit[0].id
+  acl        = "private"
 }
 
 resource "aws_s3_bucket_server_side_encryption_configuration" "audit" {
   count  = var.s3_enabled ? 1 : 0
   bucket = aws_s3_bucket.audit[0].bucket
   rule {
-      apply_server_side_encryption_by_default {
-        sse_algorithm = "AES256"
-      }
+    apply_server_side_encryption_by_default {
+      sse_algorithm = "AES256"
     }
+  }
 }
 resource "aws_s3_bucket_logging" "audit" {
   bucket = aws_s3_bucket.audit[0].id
@@ -132,7 +147,7 @@ resource "aws_s3_bucket_versioning" "audit" {
   versioning_configuration {
     status = "Enabled"
   }
-} 
+}
 
 resource "aws_s3_bucket_public_access_block" "audit" {
   count = var.s3_enabled ? 1 : 0
