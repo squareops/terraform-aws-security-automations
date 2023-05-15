@@ -18,4 +18,3 @@ def lambda_handler(event, context):
                             Subject='IAM Policy Alert'
                         )
                         print(f'Alert sent')
-                       

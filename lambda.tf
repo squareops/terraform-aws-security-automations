@@ -16,8 +16,8 @@ resource "aws_iam_role" "lambda_role" {
 }
 
 resource "aws_iam_policy" "lambda_policy" {
-  name        = "lambda_policy"
-  policy      = jsonencode({
+  name = "lambda_policy"
+  policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
       {
@@ -32,34 +32,34 @@ resource "aws_iam_policy" "lambda_policy" {
       {
         Effect = "Allow",
         Action = [
-            "iam:GetAccountSummary",
-            "iam:ListPolicies",
-            "iam:ListAttachedUserPolicies",
-            "iam:ListUserPolicies",
-            "iam:ListUsers",
-            "iam:GetPolicy",
-            "iam:GetPolicyVersion",
-            "iam:CreatePolicyVersion",
-            "iam:DetachUserPolicy",
-            "iam:DeleteUserPolicy",
-            "iam:ListAccessKeys",
-            "iam:GetAccountPasswordPolicy",
-            "iam:UpdateAccessKey",
-            "iam:UpdateLoginProfile",
-            "iam:ListGroups",
-            "iam:ListAttachedGroupPolicies",
-            "iam:AttachGroupPolicy",
-            "ec2:DescribeSecurityGroups",
-            "ec2:DescribeSecurityGroupRules",
-            "ec2:AuthorizeSecurityGroupIngress",
-            "ec2:RevokeSecurityGroupIngress",
-            "ec2:AuthorizeSecurityGroupEgress",
-            "ec2:RevokeSecurityGroupEgress",
-            "ec2:ModifySecurityGroupRules",
-            "SNS:Publish"
+          "iam:GetAccountSummary",
+          "iam:ListPolicies",
+          "iam:ListAttachedUserPolicies",
+          "iam:ListUserPolicies",
+          "iam:ListUsers",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:CreatePolicyVersion",
+          "iam:DetachUserPolicy",
+          "iam:DeleteUserPolicy",
+          "iam:ListAccessKeys",
+          "iam:GetAccountPasswordPolicy",
+          "iam:UpdateAccessKey",
+          "iam:UpdateLoginProfile",
+          "iam:ListGroups",
+          "iam:ListAttachedGroupPolicies",
+          "iam:AttachGroupPolicy",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeSecurityGroupRules",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupEgress",
+          "ec2:ModifySecurityGroupRules",
+          "SNS:Publish"
         ],
         Resource = "*"
-        }
+      }
     ]
   })
 }
@@ -70,22 +70,22 @@ resource "aws_iam_role_policy_attachment" "lambda_role_policy" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger" {
-  name        = "lambda_trigger"
-  description = "Trigger for lambda function"
+  name                = "lambda_trigger"
+  description         = "Trigger for lambda function"
   schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
 }
 
 # 1.2  Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password
 
 resource "aws_iam_policy" "mfa_policy" {
-  name        = "mfa_policy"
+  name = "mfa_policy"
   policy = jsonencode({
-    Version   = "2012-10-17"
+    Version = "2012-10-17"
     Statement = [
       {
-        Sid     = "AllowAllUsersToListAccounts"
-        Effect  = "Allow"
-        Action  = [
+        Sid    = "AllowAllUsersToListAccounts"
+        Effect = "Allow"
+        Action = [
           "iam:ListAccountAliases",
           "iam:ListUsers",
           "iam:GetAccountPasswordPolicy",
@@ -94,9 +94,9 @@ resource "aws_iam_policy" "mfa_policy" {
         Resource = "*"
       },
       {
-        Sid     = "AllowIndividualUserToSeeAndManageOnlyTheirOwnAccountInformation"
-        Effect  = "Allow"
-        Action  = [
+        Sid    = "AllowIndividualUserToSeeAndManageOnlyTheirOwnAccountInformation"
+        Effect = "Allow"
+        Action = [
           "iam:ChangePassword",
           "iam:CreateAccessKey",
           "iam:CreateLoginProfile",
@@ -119,9 +119,9 @@ resource "aws_iam_policy" "mfa_policy" {
         Resource = "arn:aws:iam::*:user/$${aws:username}"
       },
       {
-        Sid     = "AllowIndividualUserToListOnlyTheirOwnMFA"
-        Effect  = "Allow"
-        Action  = [
+        Sid    = "AllowIndividualUserToListOnlyTheirOwnMFA"
+        Effect = "Allow"
+        Action = [
           "iam:ListVirtualMFADevices",
           "iam:ListMFADevices",
         ]
@@ -131,9 +131,9 @@ resource "aws_iam_policy" "mfa_policy" {
         ]
       },
       {
-        Sid     = "AllowIndividualUserToManageTheirOwnMFA"
-        Effect  = "Allow"
-        Action  = [
+        Sid    = "AllowIndividualUserToManageTheirOwnMFA"
+        Effect = "Allow"
+        Action = [
           "iam:CreateVirtualMFADevice",
           "iam:DeleteVirtualMFADevice",
           "iam:EnableMFADevice",
@@ -145,12 +145,12 @@ resource "aws_iam_policy" "mfa_policy" {
         ]
       },
       {
-        Sid       = "AllowIndividualUserToDeactivateOnlyTheirOwnMFAOnlyWhenUsingMFA"
-        Effect    = "Allow"
-        Action    = [
+        Sid    = "AllowIndividualUserToDeactivateOnlyTheirOwnMFAOnlyWhenUsingMFA"
+        Effect = "Allow"
+        Action = [
           "iam:DeactivateMFADevice",
         ]
-        Resource  = [
+        Resource = [
           "arn:aws:iam::*:mfa/$${aws:username}",
           "arn:aws:iam::*:user/$${aws:username}",
         ]
@@ -161,9 +161,9 @@ resource "aws_iam_policy" "mfa_policy" {
         }
       },
       {
-        Sid        = "BlockMostAccessUnlessSignedInWithMFA"
-        Effect     = "Deny"
-        NotAction  = [
+        Sid    = "BlockMostAccessUnlessSignedInWithMFA"
+        Effect = "Deny"
+        NotAction = [
           "iam:CreateVirtualMFADevice",
           "iam:DeleteVirtualMFADevice",
           "iam:ListVirtualMFADevices",
@@ -188,7 +188,7 @@ resource "aws_iam_policy" "mfa_policy" {
     ]
   })
 }
-         
+
 
 data "template_file" "lambda_function_script_mfa_user" {
   template = file("${path.module}/lambda_code/1.2_mfa_all_user.py")
@@ -223,12 +223,12 @@ resource "aws_lambda_permission" "lambda_permission_mfa_user" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_mfa_user.arn
   principal     = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.lambda_trigger_mfa_user.arn
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_mfa_user.arn
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_mfa_user" {
-  name        = "lambda_trigger_mfa_user"
-  description = "Trigger for lambda function"
+  name                = "lambda_trigger_mfa_user"
+  description         = "Trigger for lambda function"
   schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
 }
 
@@ -270,12 +270,12 @@ resource "aws_lambda_permission" "lambda_permission_user_cred" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_user_cred.arn
   principal     = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.lambda_trigger_user_cred.arn
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_user_cred.arn
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred" {
-  name        = "lambda_trigger_user_cred"
-  description = "Trigger for lambda function"
+  name                = "lambda_trigger_user_cred"
+  description         = "Trigger for lambda function"
   schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
 }
 
@@ -316,12 +316,12 @@ resource "aws_lambda_permission" "lambda_permission_direct_policy" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_direct_policy.arn
   principal     = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.lambda_trigger_direct_policy.arn
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_direct_policy.arn
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_direct_policy" {
-  name        = "lambda_trigger_direct_policy"
-  description = "Trigger for lambda function"
+  name                = "lambda_trigger_direct_policy"
+  description         = "Trigger for lambda function"
   schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
 }
 
@@ -365,12 +365,12 @@ resource "aws_lambda_permission" "lambda_permission_admin_policy" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_admin_policy.arn
   principal     = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.lambda_trigger_admin_policy.arn
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_admin_policy.arn
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_admin_policy" {
-  name        = "lambda_trigger_admin_policy"
-  description = "Trigger for lambda function"
+  name                = "lambda_trigger_admin_policy"
+  description         = "Trigger for lambda function"
   schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
 }
 
@@ -413,12 +413,12 @@ resource "aws_lambda_permission" "lambda_permission_remove_port_22" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_remove_port_22.arn
   principal     = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.lambda_trigger_remove_port_22.arn
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_remove_port_22.arn
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_remove_port_22" {
-  name        = "lambda_trigger_remove_port_22"
-  description = "Trigger for lambda function"
+  name                = "lambda_trigger_remove_port_22"
+  description         = "Trigger for lambda function"
   schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
 }
 
@@ -462,12 +462,12 @@ resource "aws_lambda_permission" "lambda_permission_remove_port_3389" {
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_remove_port_3389.arn
   principal     = "events.amazonaws.com"
-  source_arn = aws_cloudwatch_event_rule.lambda_trigger_remove_port_3389.arn
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_remove_port_3389.arn
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_remove_port_3389" {
-  name        = "lambda_trigger_remove_port_3389"
-  description = "Trigger for lambda function"
+  name                = "lambda_trigger_remove_port_3389"
+  description         = "Trigger for lambda function"
   schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
 }
 
