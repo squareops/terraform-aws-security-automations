@@ -33,3 +33,4 @@ terraform.rc
 
 #Igonre rendered zip files
 **/.zip
+.zip
