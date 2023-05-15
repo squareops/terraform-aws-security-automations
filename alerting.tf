@@ -28,7 +28,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       test     = "StringEquals"
       variable = "AWS:SourceOwner"
 
-      values = ["${var.aws_account_id}"]
+      values = ["${data.aws_caller_identity.current.account_id}"]
     }
 
     effect = "Allow"
@@ -51,13 +51,13 @@ data "aws_iam_policy_document" "sns_topic_policy" {
       test     = "StringEquals"
       variable = "AWS:SourceOwner"
 
-      values = ["${var.aws_account_id}"]
+      values = ["${data.aws_caller_identity.current.account_id}"]
     }
     condition {
       test     = "ArnLike"
       variable = "AWS:SourceArn"
 
-      values = ["arn:aws:cloudwatch:${var.region}:${var.aws_account_id}:alarm:*"]
+      values = ["arn:aws:cloudwatch:${var.region}:${data.aws_caller_identity.current.account_id}:alarm:*"]
     }
     effect = "Allow"
 
@@ -77,7 +77,7 @@ data "aws_iam_policy_document" "sns_topic_policy" {
 resource "aws_sns_topic_subscription" "sms" {
   topic_arn = aws_sns_topic.trail-unauthorised.arn
   protocol  = "email"
-  email     = var.email
+  endpoint  = var.email
 }
 # 1.1 – Avoid the use of the "root" account
 resource "aws_cloudwatch_log_metric_filter" "aws_cis_1_1_avoid_the_use_of_root_account" {

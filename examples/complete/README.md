@@ -25,5 +25,8 @@ No inputs.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_access_log_bucket"></a> [access\_log\_bucket](#output\_access\_log\_bucket) | S3 bucket for storing access logs of config. |
+| <a name="output_audit_bucket"></a> [audit\_bucket](#output\_audit\_bucket) | S3 bucket for storing audit logs of config. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

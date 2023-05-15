@@ -1,9 +1,9 @@
 output "access_log_bucket" {
   description = "S3 bucket for storing access logs of config."
-  value       = module.cis.access_log_bucket
+  value       = aws_s3_bucket.access_log[0].id
 }
 
 output "audit_bucket" {
   description = "S3 bucket for storing audit logs of config."
-  value       = module.cis.audit_bucket
+  value       = aws_s3_bucket.audit[0].id
 }

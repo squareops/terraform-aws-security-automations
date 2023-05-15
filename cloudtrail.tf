@@ -1,6 +1,6 @@
 resource "aws_cloudwatch_log_group" "cloudtrail_events" {
   name       = format("%s-cloudtrail-log-group", var.name)
-  kms_key_id = var.cloudwatch_logs_kms
+  kms_key_id = var.cloudwatch_logs_kms_id
   tags       = var.tags
 }
 
@@ -14,7 +14,7 @@ data "aws_iam_policy_document" "cloudtrail_key_policy" {
     principals {
       type = "AWS"
       identifiers = [
-        "arn:aws:iam::${var.aws_account_id}:root"
+        "arn:aws:iam::${data.aws_caller_identity.current.account_id}:root"
       ]
     }
     actions   = ["kms:*"]
@@ -32,7 +32,7 @@ data "aws_iam_policy_document" "cloudtrail_key_policy" {
     condition {
       test     = "StringLike"
       variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-      values   = ["arn:aws:cloudtrail:*:${var.aws_account_id}:trail/*"]
+      values   = ["arn:aws:cloudtrail:*:${data.aws_caller_identity.current.account_id}:trail/*"]
     }
   }
 
@@ -60,12 +60,12 @@ data "aws_iam_policy_document" "cloudtrail_key_policy" {
     condition {
       test     = "StringEquals"
       variable = "kms:CallerAccount"
-      values   = ["${var.aws_account_id}"]
+      values   = ["${data.aws_caller_identity.current.account_id}"]
     }
     condition {
       test     = "StringLike"
       variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-      values   = ["arn:aws:cloudtrail:*:${var.aws_account_id}:trail/*"]
+      values   = ["arn:aws:cloudtrail:*:${data.aws_caller_identity.current.account_id}:trail/*"]
     }
   }
 
@@ -85,7 +85,7 @@ data "aws_iam_policy_document" "cloudtrail_key_policy" {
     condition {
       test     = "StringEquals"
       variable = "kms:CallerAccount"
-      values   = ["${var.aws_account_id}"]
+      values   = ["${data.aws_caller_identity.current.account_id}"]
     }
   }
 
@@ -103,12 +103,12 @@ data "aws_iam_policy_document" "cloudtrail_key_policy" {
     condition {
       test     = "StringEquals"
       variable = "kms:CallerAccount"
-      values   = ["${var.aws_account_id}"]
+      values   = ["${data.aws_caller_identity.current.account_id}"]
     }
     condition {
       test     = "StringLike"
       variable = "kms:EncryptionContext:aws:cloudtrail:arn"
-      values   = ["arn:aws:cloudtrail:*:${var.aws_account_id}:trail/*"]
+      values   = ["arn:aws:cloudtrail:*:${data.aws_caller_identity.current.account_id}:trail/*"]
     }
   }
 }
@@ -155,12 +155,12 @@ data "aws_iam_policy_document" "cloudwatch_delivery_policy" {
     sid       = "AWSCloudTrailCreateLogStream20141101"
     effect    = "Allow"
     actions   = ["logs:CreateLogStream"]
-    resources = ["arn:aws:logs:${var.region}:${var.aws_account_id}:log-group:${aws_cloudwatch_log_group.cloudtrail_events.name}:log-stream:*"]
+    resources = ["arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:${aws_cloudwatch_log_group.cloudtrail_events.name}:log-stream:*"]
   }
   statement {
     sid       = "AWSCloudTrailPutLogEvents20141101"
     actions   = ["logs:PutLogEvents"]
-    resources = ["arn:aws:logs:${var.region}:${var.aws_account_id}:log-group:${aws_cloudwatch_log_group.cloudtrail_events.name}:log-stream:*"]
+    resources = ["arn:aws:logs:${var.region}:${data.aws_caller_identity.current.account_id}:log-group:${aws_cloudwatch_log_group.cloudtrail_events.name}:log-stream:*"]
   }
 }
 
@@ -181,7 +181,7 @@ resource "aws_cloudtrail" "cloudtrail" {
   kms_key_id                    = aws_kms_key.cloudtrail.arn
 
   event_selector {
-    read_write_type           = var.clodtrail_event_selector_type
+    read_write_type           = var.cloudtrail_event_selector_type
     include_management_events = true
 
     data_resource {

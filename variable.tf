@@ -16,7 +16,11 @@ variable "email" {
   description = "Email address that can receive notifications from Amazon SNS"
 }
 
-
+variable "cron_expression" {
+  type        = string
+  default     = "cron(0 22 1,10,20,28 * ? 2023)"
+  description = "Expession to trigger lambda function regularly on the schedule"
+}
 # S3
 variable "s3_enabled" {
   type        = bool
@@ -61,12 +65,6 @@ variable "cloudtrail_event_selector_type" {
   type        = string
   default     = "All"
   description = "Types of events that will be aggregated in CloudTrail"
-}
-
-variable "aws_account_id" {
-  type        = number
-  default     = ""
-  description = "AWS Account ID"
 }
 
 variable "region" {

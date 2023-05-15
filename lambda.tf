@@ -72,7 +72,7 @@ resource "aws_iam_role_policy_attachment" "lambda_role_policy" {
 resource "aws_cloudwatch_event_rule" "lambda_trigger" {
   name                = "lambda_trigger"
   description         = "Trigger for lambda function"
-  schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
+  schedule_expression = var.cron_expression
 }
 
 # 1.2  Ensure multi-factor authentication (MFA) is enabled for all IAM users that have a console password
@@ -229,7 +229,7 @@ resource "aws_lambda_permission" "lambda_permission_mfa_user" {
 resource "aws_cloudwatch_event_rule" "lambda_trigger_mfa_user" {
   name                = "lambda_trigger_mfa_user"
   description         = "Trigger for lambda function"
-  schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
+  schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_mfa_user" {
@@ -276,7 +276,7 @@ resource "aws_lambda_permission" "lambda_permission_user_cred" {
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred" {
   name                = "lambda_trigger_user_cred"
   description         = "Trigger for lambda function"
-  schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
+  schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred" {
@@ -322,7 +322,7 @@ resource "aws_lambda_permission" "lambda_permission_direct_policy" {
 resource "aws_cloudwatch_event_rule" "lambda_trigger_direct_policy" {
   name                = "lambda_trigger_direct_policy"
   description         = "Trigger for lambda function"
-  schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
+  schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_direct_policy" {
@@ -371,7 +371,7 @@ resource "aws_lambda_permission" "lambda_permission_admin_policy" {
 resource "aws_cloudwatch_event_rule" "lambda_trigger_admin_policy" {
   name                = "lambda_trigger_admin_policy"
   description         = "Trigger for lambda function"
-  schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
+  schedule_expression = var.cron_expression # Example : "cron(0 22 1,10,20,28 * ? 2023)"
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_admin_policy" {
@@ -419,7 +419,7 @@ resource "aws_lambda_permission" "lambda_permission_remove_port_22" {
 resource "aws_cloudwatch_event_rule" "lambda_trigger_remove_port_22" {
   name                = "lambda_trigger_remove_port_22"
   description         = "Trigger for lambda function"
-  schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
+  schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_remove_port_22" {
@@ -468,7 +468,7 @@ resource "aws_lambda_permission" "lambda_permission_remove_port_3389" {
 resource "aws_cloudwatch_event_rule" "lambda_trigger_remove_port_3389" {
   name                = "lambda_trigger_remove_port_3389"
   description         = "Trigger for lambda function"
-  schedule_expression = "cron(0 22 5,10,15,20,25 * ? 2023)"
+  schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_remove_port_3389" {
