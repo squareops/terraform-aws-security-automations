@@ -10,6 +10,7 @@ locals {
 }
 
 module "cis" {
+
   source = "../../"
 
   name                          = local.name
