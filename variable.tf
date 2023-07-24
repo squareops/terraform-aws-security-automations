@@ -155,3 +155,45 @@ variable "iam_max_password_age" {
   default     = 90
   description = "Passwords expire in N days"
 }
+
+variable "multiple_access_key_notification" {
+  type        = bool
+  default     = true
+  description = "It will send email notification of IAM user with multiple active access key "
+}
+
+variable "multiple_access_key_deactivate" {
+  type        = bool
+  default     = false
+  description = "It will deactivate the newly created active access key"
+}
+
+variable "notify_unused_cred_90_days" {
+  type        = bool
+  default     = false
+  description = "It will notify unused cred more than 90 days"
+}
+
+variable "disable_unused_cred_90_days" {
+  type        = bool
+  default     = false
+  description = "It will deactivate the newly created active access key"
+}
+
+variable "notify_unused_cred_45_days" {
+  type        = bool
+  default     = true
+  description = "It will notify notify about unused cred more than 45 days."
+}
+
+variable "disable_unused_cred_45_days" {
+  type        = bool
+  default     = false
+  description = "It will disable cred for more than 45 days"
+}
+
+variable "remove_ssl_tls_iam" {
+  type        = bool
+  default     = false
+  description = "It will disable cred for more than 45 days"
+}

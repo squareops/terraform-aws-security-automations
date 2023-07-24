@@ -1,10 +1,11 @@
 import boto3
 import datetime
 from dateutil.tz import tzutc
+import time
 
 def lambda_handler(event, context):
     iam = boto3.client('iam')
-    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=2)
+    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=90)
 
     users = iam.list_users()['Users']
     for user in users:
@@ -24,6 +25,7 @@ def lambda_handler(event, context):
         mfa_devices = iam.list_mfa_devices(UserName=user['UserName'])['MFADevices']
         # if not mfa_devices:
         credential_report = iam.generate_credential_report()
+        time.sleep(15)
         report = iam.get_credential_report()
         lines = report['Content'].decode('utf-8').splitlines()
         header = lines[0].split(',')
