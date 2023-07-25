@@ -40,6 +40,10 @@ https://docs.aws.amazon.com/securityhub/latest/userguide/securityhub-cis-control
 - 3.14 Ensure a log metric filter and alarm exist for VPC changes
 - 4.1 Ensure no security groups allow ingress from 0.0.0.0/0 or ::/0 to port 22
 - 4.2 Ensure no security groups allow ingress from 0.0.0.0/0 or ::/0 to port 3389
+- 1.13 Ensure there is only one active access key available for any single IAM user
+- 1.19 Ensure that all the expired SSL/TLS certificates stored in AWS IAM are removed
+- 1.20 Ensure that IAM Access analyzer is enabled for all regions
+- 1.12 Ensure credentials unused for 45 days or greater are disabled
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 

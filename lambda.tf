@@ -241,14 +241,17 @@ resource "aws_cloudwatch_event_target" "lambda_target_mfa_user" {
 # 1.3 Ensure credentials unused for 90 days or greater are disabled
 # 1.4 Ensure access keys are rotated every 90 days or less
 data "template_file" "lambda_function_script_user_cred" {
+  count    = var.disable_unused_cred_90_days ? 1 : 0
   template = file("${path.module}/lambda_code/1.3_disable_user_cred.py")
 }
 resource "local_file" "lambda_code_user_cred" {
-  content  = data.template_file.lambda_function_script_user_cred.rendered
+  count    = var.disable_unused_cred_90_days? 1 : 0
+  content  = data.template_file.lambda_function_script_user_cred[0].rendered
   filename = "${path.module}/rendered/user-cred.py"
 }
 
 data "archive_file" "lambda_zip_user_cred" {
+  count    = var.disable_unused_cred_90_days ? 1 : 0
   depends_on  = [local_file.lambda_code_user_cred]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -256,32 +259,36 @@ data "archive_file" "lambda_zip_user_cred" {
 }
 
 resource "aws_lambda_function" "lambda_function_user_cred" {
-  filename         = data.archive_file.lambda_zip_user_cred.output_path
+  count    = var.disable_unused_cred_90_days ? 1 : 0
+  filename         = data.archive_file.lambda_zip_user_cred[0].output_path
   function_name    = "user_cred"
   role             = aws_iam_role.lambda_role.arn
   handler          = "user-cred.lambda_handler"
-  source_code_hash = data.archive_file.lambda_zip_user_cred.output_base64sha256
+  source_code_hash = data.archive_file.lambda_zip_user_cred[0].output_base64sha256
   runtime          = "python3.8"
   timeout          = 180
   memory_size      = 256
 }
 
 resource "aws_lambda_permission" "lambda_permission_user_cred" {
+  count    = var.disable_unused_cred_90_days ? 1 : 0
   action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function_user_cred.arn
+  function_name = aws_lambda_function.lambda_function_user_cred[0].arn
   principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_user_cred.arn
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_user_cred[0].arn
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred" {
+  count = var.disable_unused_cred_90_days ? 1 : 0
   name                = "lambda_trigger_user_cred"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred" {
-  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred.name
-  arn       = aws_lambda_function.lambda_function_user_cred.arn
+  count = var.disable_unused_cred_90_days ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred[0].name
+  arn       = aws_lambda_function.lambda_function_user_cred[0].arn
   target_id = "lambda_target_user_cred"
 }
 
@@ -475,4 +482,439 @@ resource "aws_cloudwatch_event_target" "lambda_target_remove_port_3389" {
   rule      = aws_cloudwatch_event_rule.lambda_trigger_remove_port_3389.name
   arn       = aws_lambda_function.lambda_function_remove_port_3389.arn
   target_id = "lambda_target_remove_port_3389"
+}
+
+## Ensure only one active access key will be attached with the user. Below lambda function will send email notification.
+
+data "template_file" "lambda_function_active_access_key" {
+  count    = var.multiple_access_key_notification ? 1 : 0
+  template = file("${path.module}/lambda_code/1.13_one_active_access_key_permissive.py")
+  vars = {
+    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
+  }
+}
+
+resource "local_file" "lambda_code_active_access_key" {
+  count    = var.multiple_access_key_notification ? 1 : 0
+  content  = data.template_file.lambda_function_active_access_key[0].rendered
+  filename = "${path.module}/rendered/active-access-key.py"
+}
+
+data "archive_file" "lambda_zip_active-access-key" {
+  count    = var.multiple_access_key_notification ? 1 : 0
+  depends_on  = [local_file.lambda_code_active_access_key]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_active_access_key.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_one_active_access_key" {
+  count    = var.multiple_access_key_notification ? 1 : 0
+  filename         = data.archive_file.lambda_zip_active-access-key[0].output_path
+  function_name    = "one-active-access-key-notification"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "one-active-access-key.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_active-access-key[0].output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_active_access_key" {
+  count    = var.multiple_access_key_notification ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = "one-active-access-key-notification"
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_active_access_key[0].arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_active_access_key" {
+  count    = var.multiple_access_key_notification ? 1 : 0
+  name                = "lambda_trigger_active_access_key"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key" {
+  count    = var.multiple_access_key_notification ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_active_access_key[0].name
+  arn       = aws_lambda_function.lambda_function_one_active_access_key[0].arn
+  target_id = "lambda_target_active_access_key"
+}
+
+## Ensure only one active access key will be attached with the user. Below lambda function will deactivate the newly created access key.
+
+data "template_file" "lambda_function_active_access_key_enforcing" {
+  count    = var.multiple_access_key_deactivate ? 1 : 0
+  template = file("${path.module}/lambda_code/1.13_one_active_access_key_enforcing.py")
+  vars = {
+    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
+  }
+}
+
+resource "local_file" "lambda_code_active_access_key_enforcing" {
+  count    = var.multiple_access_key_deactivate ? 1 : 0
+  content  = data.template_file.lambda_function_active_access_key_enforcing[0].rendered
+  filename = "${path.module}/rendered/active-access-key-deactivate.py"
+}
+
+data "archive_file" "lambda_zip_active_access_key_enforcing" {
+  count    = var.multiple_access_key_deactivate ? 1 : 0
+  depends_on  = [local_file.lambda_code_active_access_key_enforcing]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_active_access_key_enforcing.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_one_active_access_key_enforcing" {
+  count    = var.multiple_access_key_deactivate ? 1 : 0
+  filename         = data.archive_file.lambda_zip_active_access_key_enforcing[0].output_path
+  function_name    = "multiple-access-key-deactivate"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "multiple-access-key-deactivate.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_active_access_key_enforcing[0].output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_active_access_key_enforcing" {
+  count    = var.multiple_access_key_deactivate ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = "multiple-access-key-deactivate"
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_active_access_key_enforcing[0].arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_active_access_key_enforcing" {
+  count    = var.multiple_access_key_deactivate ? 1 : 0
+  name                = "lambda_trigger_active_access_key_deactivate"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key_enforcing" {
+  count    = var.multiple_access_key_deactivate ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_active_access_key_enforcing[0].name
+  arn       = aws_lambda_function.lambda_function_one_active_access_key_enforcing[0].arn
+  target_id = "lambda_target_active_access_key_enforcing"
+}
+
+## Ensure unused cred for more than 90 days will be disabled. Below code will send notification of unused credentials.
+
+data "template_file" "lambda_function_script_user_cred_permissive" {
+  count    = var.notify_unused_cred_90_days ? 1 : 0
+  template = file("${path.module}/lambda_code/1.3_disable_user_cred_permissive.py")
+  vars = {
+    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
+  }
+}
+resource "local_file" "lambda_code_user_cred_permissive" {
+  count    = var.notify_unused_cred_90_days ? 1 : 0
+  content  = data.template_file.lambda_function_script_user_cred_permissive[0].rendered
+  filename = "${path.module}/rendered/user-cred-permissive.py"
+}
+
+data "archive_file" "lambda_zip_user_cred_permissive" {
+  count    = var.notify_unused_cred_90_days ? 1 : 0
+  depends_on  = [local_file.lambda_code_user_cred_permissive]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_user_cred_permissive.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_user_cred_permissive" {
+  count    = var.notify_unused_cred_90_days ? 1 : 0
+  filename         = data.archive_file.lambda_zip_user_cred_permissive[0].output_path
+  function_name    = "user_cred_permissive"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "user-cred-permissive.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_user_cred_permissive[0].output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_user_cred_permissive" {
+  count    = var.notify_unused_cred_90_days ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function_user_cred_permissive[0].arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_user_cred_permissive[0].arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_permissive" {
+  count = var.notify_unused_cred_90_days ? 1 : 0
+  name                = "lambda_trigger_user_cred_permissive"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_user_cred_permissive" {
+  count = var.notify_unused_cred_90_days ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred[0].name
+  arn       = aws_lambda_function.lambda_function_user_cred[0].arn
+  target_id = "lambda_target_user_cred_permissive"
+}
+
+## Ensure unused cred for more than 45 days will be disabled. Below code will send notification of unused credentials.
+
+data "template_file" "lambda_function_script_user_cred_45_days" {
+  count    = var.notify_unused_cred_45_days ? 1 : 0
+  template = file("${path.module}/lambda_code/1.12_notify_unused_cred_45_days.py")
+  vars = {
+    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
+  }
+}
+resource "local_file" "lambda_code_user_cred_45_days" {
+  count    = var.notify_unused_cred_45_days ? 1 : 0
+  content  = data.template_file.lambda_function_script_user_cred_45_days[0].rendered
+  filename = "${path.module}/rendered/user-cred-45-days.py"
+}
+
+data "archive_file" "lambda_zip_user_cred_45_days" {
+  count    = var.notify_unused_cred_45_days ? 1 : 0
+  depends_on  = [local_file.lambda_code_user_cred_45_days]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_user_cred_45_days.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_user_cred_45_days" {
+  count    = var.notify_unused_cred_45_days ? 1 : 0
+  filename         = data.archive_file.lambda_zip_user_cred_45_days[0].output_path
+  function_name    = "user_cred_45_days"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "user-cred-45-days.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_user_cred_45_days[0].output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_user_cred_45_days" {
+  count    = var.notify_unused_cred_45_days ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function_user_cred_45_days[0].arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days[0].arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_45_days" {
+  count = var.notify_unused_cred_45_days ? 1 : 0
+  name                = "lambda_trigger_user_cred_45_days"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_user_cred_45_days" {
+  count = var.notify_unused_cred_45_days ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days[0].name
+  arn       = aws_lambda_function.lambda_function_user_cred_45_days[0].arn
+  target_id = "lambda_target_user_cred_45_days"
+}
+
+## Ensure unused cred for more than 45 days will be disabled.
+
+data "template_file" "lambda_function_script_user_cred_45_days_disable" {
+  count    = var.disable_unused_cred_45_days ? 1 : 0
+  template = file("${path.module}/lambda_code/1.12_disable_user_cred_45_days.py")
+}
+resource "local_file" "lambda_code_user_cred_45_days_disable" {
+  count    = var.disable_unused_cred_45_days ? 1 : 0
+  content  = data.template_file.lambda_function_script_user_cred_45_days_disable[0].rendered
+  filename = "${path.module}/rendered/user-cred-45-days-disable.py"
+}
+
+data "archive_file" "lambda_zip_user_cred_45_days_disable" {
+  count    = var.disable_unused_cred_45_days ? 1 : 0
+  depends_on  = [local_file.lambda_code_user_cred_45_days_disable]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_user_cred_45_days_disable.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_user_cred_45_days_disable" {
+  count    = var.disable_unused_cred_45_days ? 1 : 0
+  filename         = data.archive_file.lambda_zip_user_cred_45_days_disable[0].output_path
+  function_name    = "user_cred_45_days_disable"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "user-cred-45-days-disable.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_user_cred_45_days_disable[0].output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_user_cred_45_days_disable" {
+  count    = var.disable_unused_cred_45_days ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function_user_cred_45_days_disable[0].arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days_disable[0].arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_45_days_disable" {
+  count = var.disable_unused_cred_45_days ? 1 : 0
+  name                = "lambda_trigger_user_cred_45_days_disable"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_user_cred_45_days_disable" {
+  count = var.disable_unused_cred_45_days ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days_disable[0].name
+  arn       = aws_lambda_function.lambda_function_user_cred_45_days_disable[0].arn
+  target_id = "lambda_target_user_cred_45_days_disable"
+}
+
+## Ensure that IAM Access analyzer is enabled for all regions
+
+data "template_file" "lambda_function_script_access_analyzer" {
+  template = file("${path.module}/lambda_code/1.20_access_analyzer.py")
+}
+resource "local_file" "lambda_code_access_analyzer" {
+  content  = data.template_file.lambda_function_script_access_analyzer.rendered
+  filename = "${path.module}/rendered/access-analyzer.py"
+}
+
+data "archive_file" "lambda_zip_access_analyzer" {
+  depends_on  = [local_file.lambda_code_access_analyzer]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_access_analyzer.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_access_analyzer" {
+  filename         = data.archive_file.lambda_zip_access_analyzer.output_path
+  function_name    = "access-analyzer-active-region"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "access_analyzer.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_access_analyzer.output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_access_analyzer" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function_access_analyzer.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_access_analyzer.arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_access_analyzer" {
+  name                = "lambda_trigger_access_analyzer"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_access_analyzer" {
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_access_analyzer.name
+  arn       = aws_lambda_function.lambda_function_access_analyzer.arn
+  target_id = "lambda_target_access_analyzer"
+}
+
+## Check for ssl tls certificate stored in IAM and send an email
+
+data "template_file" "lambda_function_script_ssl_tls_iam" {
+  template = file("${path.module}/lambda_code/1.19_check_ssl_tls_iam.py")
+  vars = {
+    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
+  }
+}
+resource "local_file" "lambda_code_ssl_tls_iam" {
+  content  = data.template_file.lambda_function_script_ssl_tls_iam.rendered
+  filename = "${path.module}/rendered/ssl_tls_iam.py"
+}
+
+data "archive_file" "lambda_zip_ssl_tls_iam" {
+  depends_on  = [local_file.lambda_code_ssl_tls_iam]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_ssl_tls_iam.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_ssl_tls_iam" {
+  filename         = data.archive_file.lambda_zip_ssl_tls_iam.output_path
+  function_name    = "ssl_tls_iam"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "ssl_tls_iam.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_ssl_tls_iam.output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_ssl_tls_iam" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function_ssl_tls_iam.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_ssl_tls_iam.arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_ssl_tls_iam" {
+  name                = "lambda_trigger_ssl_tls_iam"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_ssl_tls_iam" {
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_ssl_tls_iam.name
+  arn       = aws_lambda_function.lambda_function_ssl_tls_iam.arn
+  target_id = "lambda_target_ssl_tls_iam"
+}
+
+## Remove expire ssl tls from IAM
+
+data "template_file" "lambda_function_script_expire_ssl_tls" {
+  count    = var.remove_ssl_tls_iam ? 1 : 0
+  template = file("${path.module}/lambda_code/1.19_remove_expired_ssl_iam.py")
+}
+resource "local_file" "lambda_code_expire_ssl_tls" {
+  count    = var.remove_ssl_tls_iam ? 1 : 0
+  content  = data.template_file.lambda_function_script_expire_ssl_tls[0].rendered
+  filename = "${path.module}/rendered/expire_ssl_tls.py"
+}
+
+data "archive_file" "lambda_zip_expire_ssl_tls" {
+  count    = var.remove_ssl_tls_iam ? 1 : 0
+  depends_on  = [local_file.lambda_code_expire_ssl_tls]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_expire_ssl_tls.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_expire_ssl_tls" {
+  count    = var.remove_ssl_tls_iam ? 1 : 0
+  filename         = data.archive_file.lambda_zip_expire_ssl_tls[0].output_path
+  function_name    = "remove_expire_ssl_tls"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "expire_ssl_tls.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_expire_ssl_tls[0].output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_expire_ssl_tls" {
+  count    = var.remove_ssl_tls_iam ? 1 : 0
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function_expire_ssl_tls[0].arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_expire_ssl_tls[0].arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_expire_ssl_tls" {
+  count = var.remove_ssl_tls_iam ? 1 : 0
+  name                = "lambda_trigger_expire_ssl_tls"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_expire_ssl_tls" {
+  count = var.remove_ssl_tls_iam ? 1 : 0
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_expire_ssl_tls[0].name
+  arn       = aws_lambda_function.lambda_function_expire_ssl_tls[0].arn
+  target_id = "lambda_target_expire_ssl_tls"
 }

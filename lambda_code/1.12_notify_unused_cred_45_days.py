@@ -5,7 +5,11 @@ import time
 
 def lambda_handler(event, context):
     iam = boto3.client('iam')
-    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=90)
+    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=45)
+
+    # Lists to store users with unused access keys and users with unused login credentials
+    users_with_unused_access_keys = []
+    users_with_unused_credentials = []
 
     users = iam.list_users()['Users']
     for user in users:
@@ -16,16 +20,11 @@ def lambda_handler(event, context):
                 if 'LastUsedDate' in access_key_last_used:
                     last_used_date = access_key_last_used['LastUsedDate'].replace(tzinfo=tzutc())
                     if last_used_date < cutoff_date:
-                        iam.update_access_key(UserName=user['UserName'], AccessKeyId=access_key['AccessKeyId'], Status='Inactive')
-                        print(f"Access key {access_key} for user {user} has been disabled.")
-                else:
-                    iam.update_access_key(UserName=user['UserName'], AccessKeyId=access_key['AccessKeyId'], Status='Inactive')
-                    print(f"Access key {access_key} for user {user} has been disabled.")
-        # Check for unused user credentials
+                        users_with_unused_access_keys.append(user['UserName'])
+
         mfa_devices = iam.list_mfa_devices(UserName=user['UserName'])['MFADevices']
-        # if not mfa_devices:
         credential_report = iam.generate_credential_report()
-        time.sleep(15)
+        time.sleep(10)
         report = iam.get_credential_report()
         lines = report['Content'].decode('utf-8').splitlines()
         header = lines[0].split(',')
@@ -38,8 +37,30 @@ def lambda_handler(event, context):
             if password_last_used != 'no_information':
                 password_last_used_date = datetime.datetime.strptime(password_last_used, '%Y-%m-%dT%H:%M:%S+00:00').replace(tzinfo=tzutc())
                 if password_last_used_date < cutoff_date:
-                    iam.update_login_profile(UserName=user['UserName'], PasswordResetRequired=True)
-                    print(f"User credentials for user {user} has been disabled.")
+                    users_with_unused_credentials.append(user['UserName'])
             else:
-                iam.update_login_profile(UserName=user['UserName'], PasswordResetRequired=True)
-                print(f"User credentials for user {user} has been disabled.")
+                # Consider users without password_last_used information as having unused credentials
+                users_with_unused_credentials.append(user['UserName'])
+
+    if users_with_unused_access_keys or users_with_unused_credentials:
+        # Send email notification using SNS
+        sns_client = boto3.client('sns')
+        sns_topic_arn = '$sns_topic_arn'
+        subject = 'Unused AWS Credentials Report'
+        message = 'The following users have unused credentials:\n\n'
+
+        if users_with_unused_access_keys:
+            message += 'Users with unused access keys:\n'
+            message += '\n'.join(users_with_unused_access_keys)
+            message += '\n\n'
+
+        if users_with_unused_credentials:
+            message += 'Users with unused login credentials:\n'
+            message += '\n'.join(users_with_unused_credentials)
+
+        sns_client.publish(TopicArn=sns_topic_arn, Subject=subject, Message=message)
+
+    return {
+        'statusCode': 200,
+        'body': 'Unused AWS credentials checked successfully.'
+    }

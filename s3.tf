@@ -3,7 +3,7 @@ data "aws_caller_identity" "current" {}
 data "aws_iam_policy_document" "audit_log" {
   count = var.s3_enabled ? 1 : 0
 
-  override_json = var.audit_log_bucket_custom_policy_json
+  #override_json = var.audit_log_bucket_custom_policy_json
 
   statement {
     sid     = "AWSCloudTrailAclCheckForConfig"
