@@ -652,8 +652,8 @@ resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_permissive" {
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred_permissive" {
   count = var.notify_unused_cred_90_days ? 1 : 0
-  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred[0].name
-  arn       = aws_lambda_function.lambda_function_user_cred[0].arn
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_permissive[0].name
+  arn       = aws_lambda_function.lambda_function_user_cred_permissive[0].arn
   target_id = "lambda_target_user_cred_permissive"
 }
 
