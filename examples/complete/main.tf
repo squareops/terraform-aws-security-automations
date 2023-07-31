@@ -1,7 +1,7 @@
 locals {
   region      = "us-east-2"
   environment = "prod"
-  name        = "skaf"
+  name        = "skaf-hello"
   additional_tags = {
     Owner      = "organization_name"
     Expires    = "Never"
@@ -18,7 +18,7 @@ module "cis" {
   email                            = "skaf-demo@squareops.com"
   cron_expression                  = "cron(0 22 1,10,20,28 * ? 2023)"
   s3_enabled                       = true
-  config_enabled                   = true
+  config_enabled                   = false
   include_global_resource_types    = true
   cw_log_enabled                   = true
   alerting_enabled                 = true
@@ -29,4 +29,5 @@ module "cis" {
   notify_unused_cred_45_days       = true
   disable_unused_cred_45_days      = false
   remove_ssl_tls_iam               = false
+  enable_guard_duty                = true
 }

@@ -37,7 +37,7 @@ variable "audit_log_bucket_custom_policy_json" {
 # AWS Config
 variable "config_enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = "Set it to true to enable AWS Config"
 }
 
@@ -197,3 +197,10 @@ variable "remove_ssl_tls_iam" {
   default     = false
   description = "Remove expire ssl tls cert from IAM"
 }
+
+variable "enable_guard_duty" {
+  type        = bool
+  default     = true
+  description = "This will enable guard duty"
+}
+

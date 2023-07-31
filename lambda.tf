@@ -918,3 +918,53 @@ resource "aws_cloudwatch_event_target" "lambda_target_expire_ssl_tls" {
   arn       = aws_lambda_function.lambda_function_expire_ssl_tls[0].arn
   target_id = "lambda_target_expire_ssl_tls"
 }
+
+# acm certificate expiration check
+
+data "template_file" "lambda_function_script_acm_cert_expire" {
+  template = file("${path.module}/lambda_code/cc_6_7_acm_cert_expiration_check.py")
+  vars = {
+    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
+  }
+}
+resource "local_file" "lambda_code_acm_cert_expire" {
+  content  = data.template_file.lambda_function_script_acm_cert_expire.rendered
+  filename = "${path.module}/rendered/acm_cert_expire.py"
+}
+
+data "archive_file" "lambda_zip_acm_cert_expire" {
+  depends_on  = [local_file.lambda_code_acm_cert_expire]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_acm_cert_expire.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_acm_cert_expire" {
+  filename         = data.archive_file.lambda_zip_acm_cert_expire.output_path
+  function_name    = "acm_cert_expire"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "acm_cert_expire.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_acm_cert_expire.output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_acm_cert_expire" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function_acm_cert_expire.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_acm_cert_expire.arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_acm_cert_expire" {
+  name                = "lambda_trigger_acm_cert_expire"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_acm_cert_expire" {
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_acm_cert_expire.name
+  arn       = aws_lambda_function.lambda_function_acm_cert_expire.arn
+  target_id = "lambda_target_acm_cert_expire"
+}
