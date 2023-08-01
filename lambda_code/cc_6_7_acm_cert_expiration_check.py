@@ -32,7 +32,7 @@ def lambda_handler(event, context):
                           f'in region {region} will expire on {expiration_date}.'
                 
                 # Replace 'your-topic-arn' with the ARN of your SNS topic
-                topic_arn = 'arn:aws:sns:us-east-1:309017165673:acm-sns-alert'
+                topic_arn = '${sns_topic_arn}'
                 
                 # Publish the message to the SNS topic
                 sns_client.publish(TopicArn=topic_arn, Subject=subject, Message=message)
