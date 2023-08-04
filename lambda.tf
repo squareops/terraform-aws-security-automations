@@ -33,30 +33,38 @@ resource "aws_iam_policy" "lambda_policy" {
         Effect = "Allow",
         Action = [
           "iam:GetAccountSummary",
-          "iam:ListPolicies",
-          "iam:ListAttachedUserPolicies",
-          "iam:ListUserPolicies",
-          "iam:ListUsers",
-          "iam:GetPolicy",
-          "iam:GetPolicyVersion",
-          "iam:CreatePolicyVersion",
-          "iam:DetachUserPolicy",
-          "iam:DeleteUserPolicy",
-          "iam:ListAccessKeys",
-          "iam:GetAccountPasswordPolicy",
-          "iam:UpdateAccessKey",
-          "iam:UpdateLoginProfile",
-          "iam:ListGroups",
-          "iam:ListAttachedGroupPolicies",
-          "iam:AttachGroupPolicy",
-          "ec2:DescribeSecurityGroups",
-          "ec2:DescribeSecurityGroupRules",
-          "ec2:AuthorizeSecurityGroupIngress",
-          "ec2:RevokeSecurityGroupIngress",
-          "ec2:AuthorizeSecurityGroupEgress",
-          "ec2:RevokeSecurityGroupEgress",
-          "ec2:ModifySecurityGroupRules",
-          "SNS:Publish"
+                "iam:ListPolicies",
+                "iam:ListAttachedUserPolicies",
+                "iam:ListUserPolicies",
+                "iam:ListUsers",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:CreatePolicyVersion",
+                "iam:DetachUserPolicy",
+                "iam:DeleteUserPolicy",
+                "iam:ListAccessKeys",
+                "iam:GetAccountPasswordPolicy",
+                "iam:UpdateAccessKey",
+                "iam:UpdateLoginProfile",
+                "iam:ListGroups",
+                "iam:ListAttachedGroupPolicies",
+                "iam:AttachGroupPolicy",
+                "iam:GetAccessKeyLastUsed",
+                "iam:GenerateCredentialReport",
+                "iam:GetCredentialReport",
+                "iam:ListMFADevices",
+                "iam:ListServerCertificates",
+                "access-analyzer:CreateAnalyzer",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSecurityGroupRules",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:ModifySecurityGroupRules",
+                "ec2:DescribeRegions",
+                "acm:ListCertificates",
+                "SNS:Publish"
         ],
         Resource = "*"
       }
@@ -513,7 +521,7 @@ resource "aws_lambda_function" "lambda_function_one_active_access_key" {
   filename         = data.archive_file.lambda_zip_active-access-key[0].output_path
   function_name    = "one-active-access-key-notification"
   role             = aws_iam_role.lambda_role.arn
-  handler          = "one-active-access-key.lambda_handler"
+  handler          = "active-access-key.lambda_handler"
   source_code_hash = data.archive_file.lambda_zip_active-access-key[0].output_base64sha256
   runtime          = "python3.9"
   timeout          = 300
@@ -547,9 +555,6 @@ resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key" {
 data "template_file" "lambda_function_active_access_key_enforcing" {
   count    = var.multiple_access_key_deactivate ? 1 : 0
   template = file("${path.module}/lambda_code/1.13_one_active_access_key_enforcing.py")
-  vars = {
-    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
-  }
 }
 
 resource "local_file" "lambda_code_active_access_key_enforcing" {
@@ -571,7 +576,7 @@ resource "aws_lambda_function" "lambda_function_one_active_access_key_enforcing"
   filename         = data.archive_file.lambda_zip_active_access_key_enforcing[0].output_path
   function_name    = "multiple-access-key-deactivate"
   role             = aws_iam_role.lambda_role.arn
-  handler          = "multiple-access-key-deactivate.lambda_handler"
+  handler          = "active-access-key-deactivate.lambda_handler"
   source_code_hash = data.archive_file.lambda_zip_active_access_key_enforcing[0].output_base64sha256
   runtime          = "python3.9"
   timeout          = 300
@@ -789,9 +794,9 @@ resource "aws_lambda_function" "lambda_function_access_analyzer" {
   filename         = data.archive_file.lambda_zip_access_analyzer.output_path
   function_name    = "access-analyzer-active-region"
   role             = aws_iam_role.lambda_role.arn
-  handler          = "access_analyzer.lambda_handler"
+  handler          = "access-analyzer.lambda_handler"
   source_code_hash = data.archive_file.lambda_zip_access_analyzer.output_base64sha256
-  runtime          = "python3.9"
+  runtime          = "python3.8"
   timeout          = 300
   memory_size      = 256
 }

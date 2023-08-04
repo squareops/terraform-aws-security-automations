@@ -1,7 +1,7 @@
 locals {
-  region      = "us-east-2"
+  region      = "us-east-1"
   environment = "prod"
-  name        = "skaf"
+  name        = "skaf-ajay"
   additional_tags = {
     Owner      = "organization_name"
     Expires    = "Never"
@@ -15,10 +15,10 @@ module "cis" {
 
   name                             = local.name
   region                           = local.region
-  email                            = "skaf-demo@squareops.com"
+  email                            = "ajay@squareops.com"
   cron_expression                  = "cron(0 22 1,10,20,28 * ? 2023)"
   s3_enabled                       = true
-  config_enabled                   = true
+  config_enabled                   = false
   include_global_resource_types    = true
   cw_log_enabled                   = true
   alerting_enabled                 = true
