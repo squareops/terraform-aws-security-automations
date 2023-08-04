@@ -204,3 +204,8 @@ variable "enable_guard_duty" {
   description = "This will enable guard duty"
 }
 
+variable "enable_security_hub" {
+  type        = bool
+  default     = true
+  description = "This will security hub"
+}

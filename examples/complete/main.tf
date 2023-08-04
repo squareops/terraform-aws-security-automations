@@ -30,4 +30,5 @@ module "cis" {
   disable_unused_cred_45_days      = false
   remove_ssl_tls_iam               = false
   enable_guard_duty                = true
+  enable_security_hub              = false
 }
