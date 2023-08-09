@@ -18,7 +18,7 @@ module "cis" {
   email                            = "skaf-demo@squareops.com"
   cron_expression                  = "cron(0 22 1,10,20,28 * ? 2023)"
   s3_enabled                       = true
-  config_enabled                   = false
+  config_enabled                   = true
   include_global_resource_types    = true
   cw_log_enabled                   = true
   alerting_enabled                 = true
@@ -30,5 +30,5 @@ module "cis" {
   disable_unused_cred_45_days      = false
   remove_ssl_tls_iam               = false
   enable_guard_duty                = true
-  enable_security_hub              = false
+  enable_security_hub              = true
 }
