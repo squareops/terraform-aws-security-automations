@@ -1,26 +1,38 @@
 import boto3
+from botocore.exceptions import ClientError
 
-def lambda_handler(event, context):
-
-    # Create an IAM client
+def add_policy_to_user_group(groupname, policy_arn):
     iam = boto3.client('iam')
 
-    # Get all IAM groups
-    groups = iam.list_groups()
+    try:
+        # Get the policy details
+        policy_response = iam.get_policy(PolicyArn=policy_arn)
 
-    # Loop through each group and add policy if not already attached
-    for group in groups['Groups']:
-        group_name = group['GroupName']
-        group_policies = iam.list_attached_group_policies(GroupName=group_name)
-        policy_arns = [policy['PolicyArn'] for policy in group_policies['AttachedPolicies']]
-        if '${policy_arn}' not in policy_arns:
-            try:
-                response = iam.attach_group_policy(
-                    GroupName=group_name,
-                    PolicyArn='${policy_arn}'
-                )
-                print(f"Added policy to {group_name}")
-            except Exception as e:
-                print(f"Error adding policy to {group_name}: {e}")
+        # Attach the policy to the user group
+        response = iam.attach_group_policy(GroupName=groupname, PolicyArn=policy_arn)
+        print(f"Policy {policy_response['Policy']['PolicyName']} attached to group {groupname}")
+        return response
+    except ClientError as e:
+        if e.response['Error']['Code'] == 'NoSuchEntity':
+            print(f"Error: Group {groupname} not found.")
         else:
-            print(f"Policy already attached to {group_name}")
+            print(f"Error: {e}")
+        return None
+
+def lambda_handler(event, context):
+    # Replace these with the actual groupname and policy ARN
+    groupname = '${mfa_iam_group}'
+    policy_arn = '${policy_arn}'
+
+    print(f"Attempting to attach policy to group: {groupname}")
+    response = add_policy_to_user_group(groupname, policy_arn)
+    if response:
+        return {
+            'statusCode': 200,
+            'body': f'Policy attached successfully to group: {groupname}.'
+        }
+    else:
+        return {
+            'statusCode': 500,
+            'body': f'Error attaching policy to group: {groupname}.'
+        }

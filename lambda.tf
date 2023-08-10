@@ -202,6 +202,7 @@ data "template_file" "lambda_function_script_mfa_user" {
   template = file("${path.module}/lambda_code/1.2_mfa_all_user.py")
   vars = {
     policy_arn = aws_iam_policy.mfa_policy.arn,
+    mfa_iam_group = var.mfa_iam_group_name
   }
 }
 resource "local_file" "lambda_code_mfa_user" {

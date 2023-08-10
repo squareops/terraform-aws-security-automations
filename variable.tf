@@ -209,3 +209,9 @@ variable "enable_security_hub" {
   default     = true
   description = "This will security hub"
 }
+
+variable "mfa_iam_group_name" {
+  type        = string
+  default     = "test-user-group"
+  description = "Enter the user group name in which you want to add mfa user policy"
+}
