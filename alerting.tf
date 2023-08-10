@@ -172,34 +172,34 @@ resource "aws_cloudwatch_metric_alarm" "no_mfa_console_signin" {
 }
 
 #4.15 – Ensure a log metric filter and alarm exists for AWS Organizations changes
-resource "aws_cloudwatch_log_metric_filter" "aws_organizations" {
-  count          = var.alerting_enabled ? 1 : 0
-  name           = "AwsOrganizationChanges"
-  pattern        = "{ ($.eventSource = organizations.amazonaws.com) && (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) }"
-  log_group_name = aws_cloudwatch_log_group.cloudtrail_events.id
-  metric_transformation {
-    name      = "AwsOrganizationChanges"
-    namespace = var.alarm_namespace
-    value     = "1"
-  }
-}
+# resource "aws_cloudwatch_log_metric_filter" "aws_organizations" {
+#   count          = var.alerting_enabled ? 1 : 0
+#   name           = "AwsOrganizationChanges"
+#   pattern        = "{ ($.eventSource = organizations.amazonaws.com) && (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) }"
+#   log_group_name = aws_cloudwatch_log_group.cloudtrail_events.id
+#   metric_transformation {
+#     name      = "AwsOrganizationChanges"
+#     namespace = var.alarm_namespace
+#     value     = "1"
+#   }
+# }
 
-resource "aws_cloudwatch_metric_alarm" "aws_organizations" {
-  count                     = var.alerting_enabled ? 1 : 0
-  alarm_name                = "CIS-4.15-aws_organizations"
-  comparison_operator       = "GreaterThanOrEqualToThreshold"
-  evaluation_periods        = "1"
-  metric_name               = aws_cloudwatch_log_metric_filter.aws_organizations[0].id
-  namespace                 = var.alarm_namespace
-  period                    = "300"
-  statistic                 = "Sum"
-  threshold                 = "1"
-  alarm_description         = "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms."
-  alarm_actions             = [aws_sns_topic.trail-unauthorised.arn]
-  treat_missing_data        = "notBreaching"
-  insufficient_data_actions = []
-  tags                      = var.tags
-}
+# resource "aws_cloudwatch_metric_alarm" "aws_organizations" {
+#   count                     = var.alerting_enabled ? 1 : 0
+#   alarm_name                = "CIS-4.15-aws_organizations"
+#   comparison_operator       = "GreaterThanOrEqualToThreshold"
+#   evaluation_periods        = "1"
+#   metric_name               = aws_cloudwatch_log_metric_filter.aws_organizations[0].id
+#   namespace                 = var.alarm_namespace
+#   period                    = "300"
+#   statistic                 = "Sum"
+#   threshold                 = "1"
+#   alarm_description         = "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms."
+#   alarm_actions             = [aws_sns_topic.trail-unauthorised.arn]
+#   treat_missing_data        = "notBreaching"
+#   insufficient_data_actions = []
+#   tags                      = var.tags
+# }
 
 # 3.4 – Ensure a log metric filter and alarm exist for IAM policy changes
 resource "aws_cloudwatch_log_metric_filter" "iam_changes" {

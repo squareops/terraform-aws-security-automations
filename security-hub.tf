@@ -31,3 +31,7 @@ resource "aws_securityhub_standards_subscription" "pci_321" {
   depends_on    = [aws_securityhub_account.security-hub]
   standards_arn = "arn:aws:securityhub:${var.region}::standards/pci-dss/v/3.2.1"
 }
+
+resource "aws_ebs_encryption_by_default" "ebs-encryption" {
+  enabled = true
+}
