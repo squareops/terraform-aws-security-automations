@@ -1,7 +1,7 @@
 locals {
   region      = "us-east-1"
   environment = "prod"
-  name        = "skaf-ajay"
+  name        = "skaf"
   additional_tags = {
     Owner      = "organization_name"
     Expires    = "Never"
@@ -31,5 +31,5 @@ module "cis" {
   remove_ssl_tls_iam               = false
   enable_guard_duty                = true
   enable_security_hub              = true
-  mfa_iam_group_name               = "ajay-user-group"
+  mfa_iam_group_name               = "enter iam group name for attaching mfa policy"
 }
