@@ -37,7 +37,7 @@ variable "audit_log_bucket_custom_policy_json" {
 # AWS Config
 variable "config_enabled" {
   type        = bool
-  default     = true
+  default     = false
   description = "Set it to true to enable AWS Config"
 }
 
@@ -196,4 +196,22 @@ variable "remove_ssl_tls_iam" {
   type        = bool
   default     = false
   description = "Remove expire ssl tls cert from IAM"
+}
+
+variable "enable_guard_duty" {
+  type        = bool
+  default     = true
+  description = "This will enable guard duty"
+}
+
+variable "enable_security_hub" {
+  type        = bool
+  default     = true
+  description = "This will security hub"
+}
+
+variable "mfa_iam_group_name" {
+  type        = string
+  default     = "test-user-group"
+  description = "Enter the user group name in which you want to add mfa user policy"
 }

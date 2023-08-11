@@ -5,7 +5,7 @@ def send_notification(subject, message):
     sns_client = boto3.client('sns')
     
     # Replace 'TopicArn' with the ARN of your SNS topic
-    topic_arn = '$sns_topic_arn'
+    topic_arn = "${sns_topic_arn}"
     
     sns_client.publish(
         TopicArn=topic_arn,

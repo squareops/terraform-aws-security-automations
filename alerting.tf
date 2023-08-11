@@ -171,30 +171,30 @@ resource "aws_cloudwatch_metric_alarm" "no_mfa_console_signin" {
   tags                      = var.tags
 }
 
-# 3.3 – Ensure a log metric filter and alarm exist for usage of "root" account
-resource "aws_cloudwatch_log_metric_filter" "root_usage" {
+#4.15 – Ensure a log metric filter and alarm exists for AWS Organizations changes
+resource "aws_cloudwatch_log_metric_filter" "aws_organizations" {
   count          = var.alerting_enabled ? 1 : 0
-  name           = "RootUsage"
-  pattern        = "{ $.userIdentity.type = \"Root\" && $.userIdentity.invokedBy NOT EXISTS && $.eventType != \"AwsServiceEvent\" }"
+  name           = "AwsOrganizationChanges"
+  pattern        = "{ ($.eventSource = organizations.amazonaws.com) && (($.eventName = \"AcceptHandshake\") || ($.eventName = \"AttachPolicy\") || ($.eventName = \"CreateAccount\") || ($.eventName = \"CreateOrganizationalUnit\") || ($.eventName = \"CreatePolicy\") || ($.eventName = \"DeclineHandshake\") || ($.eventName = \"DeleteOrganization\") || ($.eventName = \"DeleteOrganizationalUnit\") || ($.eventName = \"DeletePolicy\") || ($.eventName = \"DetachPolicy\") || ($.eventName = \"DisablePolicyType\") || ($.eventName = \"EnablePolicyType\") || ($.eventName = \"InviteAccountToOrganization\") || ($.eventName = \"LeaveOrganization\") || ($.eventName = \"MoveAccount\") || ($.eventName = \"RemoveAccountFromOrganization\") || ($.eventName = \"UpdatePolicy\") || ($.eventName = \"UpdateOrganizationalUnit\")) }"
   log_group_name = aws_cloudwatch_log_group.cloudtrail_events.id
   metric_transformation {
-    name      = "RootUsage"
+    name      = "AwsOrganizationChanges"
     namespace = var.alarm_namespace
     value     = "1"
   }
 }
 
-resource "aws_cloudwatch_metric_alarm" "root_usage" {
+resource "aws_cloudwatch_metric_alarm" "aws_organizations" {
   count                     = var.alerting_enabled ? 1 : 0
-  alarm_name                = "CIS-3.3-RootAccountUsage"
+  alarm_name                = "CIS-4.15-aws_organizations"
   comparison_operator       = "GreaterThanOrEqualToThreshold"
   evaluation_periods        = "1"
-  metric_name               = aws_cloudwatch_log_metric_filter.root_usage[0].id
+  metric_name               = aws_cloudwatch_log_metric_filter.aws_organizations[0].id
   namespace                 = var.alarm_namespace
   period                    = "300"
   statistic                 = "Sum"
   threshold                 = "1"
-  alarm_description         = "Monitoring for root account logins will provide visibility into the use of a fully privileged account and an opportunity to reduce the use of it."
+  alarm_description         = "Real-time monitoring of API calls can be achieved by directing CloudTrail Logs to CloudWatch Logs and establishing corresponding metric filters and alarms."
   alarm_actions             = [aws_sns_topic.trail-unauthorised.arn]
   treat_missing_data        = "notBreaching"
   insufficient_data_actions = []
@@ -449,7 +449,7 @@ resource "aws_cloudwatch_log_metric_filter" "network_gw_changes" {
   count = var.alerting_enabled ? 1 : 0
 
   name           = "NetworkGWChanges"
-  pattern        = "{($.eventName=CreateRoute) || ($.eventName=CreateRouteTable) || ($.eventName=ReplaceRoute) || ($.eventName=ReplaceRouteTableAssociation) || ($.eventName=DeleteRouteTable) || ($.eventName=DeleteRoute) || ($.eventName=DisassociateRouteTable)}"
+  pattern        = "{($.eventName = CreateCustomerGateway) || ($.eventName = DeleteCustomerGateway) || ($.eventName = AttachInternetGateway) || ($.eventName = CreateInternetGateway) || ($.eventName = DeleteInternetGateway) || ($.eventName = DetachInternetGateway)}"
   log_group_name = aws_cloudwatch_log_group.cloudtrail_events.id
 
   metric_transformation {

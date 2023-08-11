@@ -45,7 +45,7 @@ def lambda_handler(event, context):
     if users_with_unused_access_keys or users_with_unused_credentials:
         # Send email notification using SNS
         sns_client = boto3.client('sns')
-        sns_topic_arn = '$sns_topic_arn'
+        sns_topic_arn = "${sns_topic_arn}"
         subject = 'Unused AWS Credentials Report'
         message = 'The following users have unused credentials:\n\n'
 

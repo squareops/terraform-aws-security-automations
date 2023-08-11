@@ -1,5 +1,5 @@
 locals {
-  region      = "us-east-2"
+  region      = "us-east-1"
   environment = "prod"
   name        = "skaf"
   additional_tags = {
@@ -29,4 +29,7 @@ module "cis" {
   notify_unused_cred_45_days       = true
   disable_unused_cred_45_days      = false
   remove_ssl_tls_iam               = false
+  enable_guard_duty                = true
+  enable_security_hub              = true
+  mfa_iam_group_name               = "enter iam group name for attaching mfa policy"
 }

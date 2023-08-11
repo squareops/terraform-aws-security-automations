@@ -7,7 +7,7 @@ def send_email_notification(user_name):
 
     # Send the email using SNS
     sns_client = boto3.client('sns')
-    topic_arn = '${sns_topic_arn}'  # Replace with the ARN of your SNS topic
+    topic_arn = "${sns_topic_arn}" # Replace with the ARN of your SNS topic
     sns_client.publish(
         TopicArn=topic_arn,
         Subject=subject,

@@ -33,30 +33,38 @@ resource "aws_iam_policy" "lambda_policy" {
         Effect = "Allow",
         Action = [
           "iam:GetAccountSummary",
-          "iam:ListPolicies",
-          "iam:ListAttachedUserPolicies",
-          "iam:ListUserPolicies",
-          "iam:ListUsers",
-          "iam:GetPolicy",
-          "iam:GetPolicyVersion",
-          "iam:CreatePolicyVersion",
-          "iam:DetachUserPolicy",
-          "iam:DeleteUserPolicy",
-          "iam:ListAccessKeys",
-          "iam:GetAccountPasswordPolicy",
-          "iam:UpdateAccessKey",
-          "iam:UpdateLoginProfile",
-          "iam:ListGroups",
-          "iam:ListAttachedGroupPolicies",
-          "iam:AttachGroupPolicy",
-          "ec2:DescribeSecurityGroups",
-          "ec2:DescribeSecurityGroupRules",
-          "ec2:AuthorizeSecurityGroupIngress",
-          "ec2:RevokeSecurityGroupIngress",
-          "ec2:AuthorizeSecurityGroupEgress",
-          "ec2:RevokeSecurityGroupEgress",
-          "ec2:ModifySecurityGroupRules",
-          "SNS:Publish"
+                "iam:ListPolicies",
+                "iam:ListAttachedUserPolicies",
+                "iam:ListUserPolicies",
+                "iam:ListUsers",
+                "iam:GetPolicy",
+                "iam:GetPolicyVersion",
+                "iam:CreatePolicyVersion",
+                "iam:DetachUserPolicy",
+                "iam:DeleteUserPolicy",
+                "iam:ListAccessKeys",
+                "iam:GetAccountPasswordPolicy",
+                "iam:UpdateAccessKey",
+                "iam:UpdateLoginProfile",
+                "iam:ListGroups",
+                "iam:ListAttachedGroupPolicies",
+                "iam:AttachGroupPolicy",
+                "iam:GetAccessKeyLastUsed",
+                "iam:GenerateCredentialReport",
+                "iam:GetCredentialReport",
+                "iam:ListMFADevices",
+                "iam:ListServerCertificates",
+                "access-analyzer:CreateAnalyzer",
+                "ec2:DescribeSecurityGroups",
+                "ec2:DescribeSecurityGroupRules",
+                "ec2:AuthorizeSecurityGroupIngress",
+                "ec2:RevokeSecurityGroupIngress",
+                "ec2:AuthorizeSecurityGroupEgress",
+                "ec2:RevokeSecurityGroupEgress",
+                "ec2:ModifySecurityGroupRules",
+                "ec2:DescribeRegions",
+                "acm:ListCertificates",
+                "SNS:Publish"
         ],
         Resource = "*"
       }
@@ -194,6 +202,7 @@ data "template_file" "lambda_function_script_mfa_user" {
   template = file("${path.module}/lambda_code/1.2_mfa_all_user.py")
   vars = {
     policy_arn = aws_iam_policy.mfa_policy.arn,
+    mfa_iam_group = var.mfa_iam_group_name
   }
 }
 resource "local_file" "lambda_code_mfa_user" {
@@ -513,7 +522,7 @@ resource "aws_lambda_function" "lambda_function_one_active_access_key" {
   filename         = data.archive_file.lambda_zip_active-access-key[0].output_path
   function_name    = "one-active-access-key-notification"
   role             = aws_iam_role.lambda_role.arn
-  handler          = "one-active-access-key.lambda_handler"
+  handler          = "active-access-key.lambda_handler"
   source_code_hash = data.archive_file.lambda_zip_active-access-key[0].output_base64sha256
   runtime          = "python3.9"
   timeout          = 300
@@ -547,9 +556,6 @@ resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key" {
 data "template_file" "lambda_function_active_access_key_enforcing" {
   count    = var.multiple_access_key_deactivate ? 1 : 0
   template = file("${path.module}/lambda_code/1.13_one_active_access_key_enforcing.py")
-  vars = {
-    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
-  }
 }
 
 resource "local_file" "lambda_code_active_access_key_enforcing" {
@@ -571,7 +577,7 @@ resource "aws_lambda_function" "lambda_function_one_active_access_key_enforcing"
   filename         = data.archive_file.lambda_zip_active_access_key_enforcing[0].output_path
   function_name    = "multiple-access-key-deactivate"
   role             = aws_iam_role.lambda_role.arn
-  handler          = "multiple-access-key-deactivate.lambda_handler"
+  handler          = "active-access-key-deactivate.lambda_handler"
   source_code_hash = data.archive_file.lambda_zip_active_access_key_enforcing[0].output_base64sha256
   runtime          = "python3.9"
   timeout          = 300
@@ -789,9 +795,9 @@ resource "aws_lambda_function" "lambda_function_access_analyzer" {
   filename         = data.archive_file.lambda_zip_access_analyzer.output_path
   function_name    = "access-analyzer-active-region"
   role             = aws_iam_role.lambda_role.arn
-  handler          = "access_analyzer.lambda_handler"
+  handler          = "access-analyzer.lambda_handler"
   source_code_hash = data.archive_file.lambda_zip_access_analyzer.output_base64sha256
-  runtime          = "python3.9"
+  runtime          = "python3.8"
   timeout          = 300
   memory_size      = 256
 }
@@ -917,4 +923,54 @@ resource "aws_cloudwatch_event_target" "lambda_target_expire_ssl_tls" {
   rule      = aws_cloudwatch_event_rule.lambda_trigger_expire_ssl_tls[0].name
   arn       = aws_lambda_function.lambda_function_expire_ssl_tls[0].arn
   target_id = "lambda_target_expire_ssl_tls"
+}
+
+# acm certificate expiration check
+
+data "template_file" "lambda_function_script_acm_cert_expire" {
+  template = file("${path.module}/lambda_code/cc_6_7_acm_cert_expiration_check.py")
+  vars = {
+    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
+  }
+}
+resource "local_file" "lambda_code_acm_cert_expire" {
+  content  = data.template_file.lambda_function_script_acm_cert_expire.rendered
+  filename = "${path.module}/rendered/acm_cert_expire.py"
+}
+
+data "archive_file" "lambda_zip_acm_cert_expire" {
+  depends_on  = [local_file.lambda_code_acm_cert_expire]
+  type        = "zip"
+  source_dir  = "${path.module}/rendered/"
+  output_path = "${path.module}/lambda_acm_cert_expire.zip"
+}
+
+resource "aws_lambda_function" "lambda_function_acm_cert_expire" {
+  filename         = data.archive_file.lambda_zip_acm_cert_expire.output_path
+  function_name    = "acm_cert_expire"
+  role             = aws_iam_role.lambda_role.arn
+  handler          = "acm_cert_expire.lambda_handler"
+  source_code_hash = data.archive_file.lambda_zip_acm_cert_expire.output_base64sha256
+  runtime          = "python3.9"
+  timeout          = 300
+  memory_size      = 256
+}
+
+resource "aws_lambda_permission" "lambda_permission_acm_cert_expire" {
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.lambda_function_acm_cert_expire.arn
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_acm_cert_expire.arn
+}
+
+resource "aws_cloudwatch_event_rule" "lambda_trigger_acm_cert_expire" {
+  name                = "lambda_trigger_acm_cert_expire"
+  description         = "Trigger for lambda function"
+  schedule_expression = var.cron_expression
+}
+
+resource "aws_cloudwatch_event_target" "lambda_target_acm_cert_expire" {
+  rule      = aws_cloudwatch_event_rule.lambda_trigger_acm_cert_expire.name
+  arn       = aws_lambda_function.lambda_function_acm_cert_expire.arn
+  target_id = "lambda_target_acm_cert_expire"
 }
