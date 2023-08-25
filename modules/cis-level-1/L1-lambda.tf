@@ -33,38 +33,38 @@ resource "aws_iam_policy" "lambda_policy" {
         Effect = "Allow",
         Action = [
           "iam:GetAccountSummary",
-                "iam:ListPolicies",
-                "iam:ListAttachedUserPolicies",
-                "iam:ListUserPolicies",
-                "iam:ListUsers",
-                "iam:GetPolicy",
-                "iam:GetPolicyVersion",
-                "iam:CreatePolicyVersion",
-                "iam:DetachUserPolicy",
-                "iam:DeleteUserPolicy",
-                "iam:ListAccessKeys",
-                "iam:GetAccountPasswordPolicy",
-                "iam:UpdateAccessKey",
-                "iam:UpdateLoginProfile",
-                "iam:ListGroups",
-                "iam:ListAttachedGroupPolicies",
-                "iam:AttachGroupPolicy",
-                "iam:GetAccessKeyLastUsed",
-                "iam:GenerateCredentialReport",
-                "iam:GetCredentialReport",
-                "iam:ListMFADevices",
-                "iam:ListServerCertificates",
-                "access-analyzer:CreateAnalyzer",
-                "ec2:DescribeSecurityGroups",
-                "ec2:DescribeSecurityGroupRules",
-                "ec2:AuthorizeSecurityGroupIngress",
-                "ec2:RevokeSecurityGroupIngress",
-                "ec2:AuthorizeSecurityGroupEgress",
-                "ec2:RevokeSecurityGroupEgress",
-                "ec2:ModifySecurityGroupRules",
-                "ec2:DescribeRegions",
-                "acm:ListCertificates",
-                "SNS:Publish"
+          "iam:ListPolicies",
+          "iam:ListAttachedUserPolicies",
+          "iam:ListUserPolicies",
+          "iam:ListUsers",
+          "iam:GetPolicy",
+          "iam:GetPolicyVersion",
+          "iam:CreatePolicyVersion",
+          "iam:DetachUserPolicy",
+          "iam:DeleteUserPolicy",
+          "iam:ListAccessKeys",
+          "iam:GetAccountPasswordPolicy",
+          "iam:UpdateAccessKey",
+          "iam:UpdateLoginProfile",
+          "iam:ListGroups",
+          "iam:ListAttachedGroupPolicies",
+          "iam:AttachGroupPolicy",
+          "iam:GetAccessKeyLastUsed",
+          "iam:GenerateCredentialReport",
+          "iam:GetCredentialReport",
+          "iam:ListMFADevices",
+          "iam:ListServerCertificates",
+          "access-analyzer:CreateAnalyzer",
+          "ec2:DescribeSecurityGroups",
+          "ec2:DescribeSecurityGroupRules",
+          "ec2:AuthorizeSecurityGroupIngress",
+          "ec2:RevokeSecurityGroupIngress",
+          "ec2:AuthorizeSecurityGroupEgress",
+          "ec2:RevokeSecurityGroupEgress",
+          "ec2:ModifySecurityGroupRules",
+          "ec2:DescribeRegions",
+          "acm:ListCertificates",
+          "SNS:Publish"
         ],
         Resource = "*"
       }
@@ -201,7 +201,7 @@ resource "aws_iam_policy" "mfa_policy" {
 data "template_file" "lambda_function_script_mfa_user" {
   template = file("${path.module}/L1-lambda/1.2_mfa_all_user.py")
   vars = {
-    policy_arn = aws_iam_policy.mfa_policy.arn,
+    policy_arn    = aws_iam_policy.mfa_policy.arn,
     mfa_iam_group = var.mfa_iam_group_name
   }
 }
@@ -254,13 +254,13 @@ data "template_file" "lambda_function_script_user_cred" {
   template = file("${path.module}/L1-lambda/1.3_disable_user_cred.py")
 }
 resource "local_file" "lambda_code_user_cred" {
-  count    = var.disable_unused_cred_90_days? 1 : 0
+  count    = var.disable_unused_cred_90_days ? 1 : 0
   content  = data.template_file.lambda_function_script_user_cred[0].rendered
   filename = "${path.module}/rendered/user-cred.py"
 }
 
 data "archive_file" "lambda_zip_user_cred" {
-  count    = var.disable_unused_cred_90_days ? 1 : 0
+  count       = var.disable_unused_cred_90_days ? 1 : 0
   depends_on  = [local_file.lambda_code_user_cred]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -268,7 +268,7 @@ data "archive_file" "lambda_zip_user_cred" {
 }
 
 resource "aws_lambda_function" "lambda_function_user_cred" {
-  count    = var.disable_unused_cred_90_days ? 1 : 0
+  count            = var.disable_unused_cred_90_days ? 1 : 0
   filename         = data.archive_file.lambda_zip_user_cred[0].output_path
   function_name    = "user_cred"
   role             = aws_iam_role.lambda_role.arn
@@ -280,7 +280,7 @@ resource "aws_lambda_function" "lambda_function_user_cred" {
 }
 
 resource "aws_lambda_permission" "lambda_permission_user_cred" {
-  count    = var.disable_unused_cred_90_days ? 1 : 0
+  count         = var.disable_unused_cred_90_days ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_user_cred[0].arn
   principal     = "events.amazonaws.com"
@@ -288,14 +288,14 @@ resource "aws_lambda_permission" "lambda_permission_user_cred" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred" {
-  count = var.disable_unused_cred_90_days ? 1 : 0
+  count               = var.disable_unused_cred_90_days ? 1 : 0
   name                = "lambda_trigger_user_cred"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred" {
-  count = var.disable_unused_cred_90_days ? 1 : 0
+  count     = var.disable_unused_cred_90_days ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred[0].name
   arn       = aws_lambda_function.lambda_function_user_cred[0].arn
   target_id = "lambda_target_user_cred"
@@ -510,7 +510,7 @@ resource "local_file" "lambda_code_active_access_key" {
 }
 
 data "archive_file" "lambda_zip_active-access-key" {
-  count    = var.multiple_access_key_notification ? 1 : 0
+  count       = var.multiple_access_key_notification ? 1 : 0
   depends_on  = [local_file.lambda_code_active_access_key]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -518,7 +518,7 @@ data "archive_file" "lambda_zip_active-access-key" {
 }
 
 resource "aws_lambda_function" "lambda_function_one_active_access_key" {
-  count    = var.multiple_access_key_notification ? 1 : 0
+  count            = var.multiple_access_key_notification ? 1 : 0
   filename         = data.archive_file.lambda_zip_active-access-key[0].output_path
   function_name    = "one-active-access-key-notification"
   role             = aws_iam_role.lambda_role.arn
@@ -530,7 +530,7 @@ resource "aws_lambda_function" "lambda_function_one_active_access_key" {
 }
 
 resource "aws_lambda_permission" "lambda_permission_active_access_key" {
-  count    = var.multiple_access_key_notification ? 1 : 0
+  count         = var.multiple_access_key_notification ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = "one-active-access-key-notification"
   principal     = "events.amazonaws.com"
@@ -538,14 +538,14 @@ resource "aws_lambda_permission" "lambda_permission_active_access_key" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_active_access_key" {
-  count    = var.multiple_access_key_notification ? 1 : 0
+  count               = var.multiple_access_key_notification ? 1 : 0
   name                = "lambda_trigger_active_access_key"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key" {
-  count    = var.multiple_access_key_notification ? 1 : 0
+  count     = var.multiple_access_key_notification ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_active_access_key[0].name
   arn       = aws_lambda_function.lambda_function_one_active_access_key[0].arn
   target_id = "lambda_target_active_access_key"
@@ -565,7 +565,7 @@ resource "local_file" "lambda_code_active_access_key_enforcing" {
 }
 
 data "archive_file" "lambda_zip_active_access_key_enforcing" {
-  count    = var.multiple_access_key_deactivate ? 1 : 0
+  count       = var.multiple_access_key_deactivate ? 1 : 0
   depends_on  = [local_file.lambda_code_active_access_key_enforcing]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -573,7 +573,7 @@ data "archive_file" "lambda_zip_active_access_key_enforcing" {
 }
 
 resource "aws_lambda_function" "lambda_function_one_active_access_key_enforcing" {
-  count    = var.multiple_access_key_deactivate ? 1 : 0
+  count            = var.multiple_access_key_deactivate ? 1 : 0
   filename         = data.archive_file.lambda_zip_active_access_key_enforcing[0].output_path
   function_name    = "multiple-access-key-deactivate"
   role             = aws_iam_role.lambda_role.arn
@@ -585,7 +585,7 @@ resource "aws_lambda_function" "lambda_function_one_active_access_key_enforcing"
 }
 
 resource "aws_lambda_permission" "lambda_permission_active_access_key_enforcing" {
-  count    = var.multiple_access_key_deactivate ? 1 : 0
+  count         = var.multiple_access_key_deactivate ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = "multiple-access-key-deactivate"
   principal     = "events.amazonaws.com"
@@ -593,14 +593,14 @@ resource "aws_lambda_permission" "lambda_permission_active_access_key_enforcing"
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_active_access_key_enforcing" {
-  count    = var.multiple_access_key_deactivate ? 1 : 0
+  count               = var.multiple_access_key_deactivate ? 1 : 0
   name                = "lambda_trigger_active_access_key_deactivate"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key_enforcing" {
-  count    = var.multiple_access_key_deactivate ? 1 : 0
+  count     = var.multiple_access_key_deactivate ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_active_access_key_enforcing[0].name
   arn       = aws_lambda_function.lambda_function_one_active_access_key_enforcing[0].arn
   target_id = "lambda_target_active_access_key_enforcing"
@@ -622,7 +622,7 @@ resource "local_file" "lambda_code_user_cred_permissive" {
 }
 
 data "archive_file" "lambda_zip_user_cred_permissive" {
-  count    = var.notify_unused_cred_90_days ? 1 : 0
+  count       = var.notify_unused_cred_90_days ? 1 : 0
   depends_on  = [local_file.lambda_code_user_cred_permissive]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -630,7 +630,7 @@ data "archive_file" "lambda_zip_user_cred_permissive" {
 }
 
 resource "aws_lambda_function" "lambda_function_user_cred_permissive" {
-  count    = var.notify_unused_cred_90_days ? 1 : 0
+  count            = var.notify_unused_cred_90_days ? 1 : 0
   filename         = data.archive_file.lambda_zip_user_cred_permissive[0].output_path
   function_name    = "user_cred_permissive"
   role             = aws_iam_role.lambda_role.arn
@@ -642,7 +642,7 @@ resource "aws_lambda_function" "lambda_function_user_cred_permissive" {
 }
 
 resource "aws_lambda_permission" "lambda_permission_user_cred_permissive" {
-  count    = var.notify_unused_cred_90_days ? 1 : 0
+  count         = var.notify_unused_cred_90_days ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_user_cred_permissive[0].arn
   principal     = "events.amazonaws.com"
@@ -650,14 +650,14 @@ resource "aws_lambda_permission" "lambda_permission_user_cred_permissive" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_permissive" {
-  count = var.notify_unused_cred_90_days ? 1 : 0
+  count               = var.notify_unused_cred_90_days ? 1 : 0
   name                = "lambda_trigger_user_cred_permissive"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred_permissive" {
-  count = var.notify_unused_cred_90_days ? 1 : 0
+  count     = var.notify_unused_cred_90_days ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_permissive[0].name
   arn       = aws_lambda_function.lambda_function_user_cred_permissive[0].arn
   target_id = "lambda_target_user_cred_permissive"
@@ -679,7 +679,7 @@ resource "local_file" "lambda_code_user_cred_45_days" {
 }
 
 data "archive_file" "lambda_zip_user_cred_45_days" {
-  count    = var.notify_unused_cred_45_days ? 1 : 0
+  count       = var.notify_unused_cred_45_days ? 1 : 0
   depends_on  = [local_file.lambda_code_user_cred_45_days]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -687,7 +687,7 @@ data "archive_file" "lambda_zip_user_cred_45_days" {
 }
 
 resource "aws_lambda_function" "lambda_function_user_cred_45_days" {
-  count    = var.notify_unused_cred_45_days ? 1 : 0
+  count            = var.notify_unused_cred_45_days ? 1 : 0
   filename         = data.archive_file.lambda_zip_user_cred_45_days[0].output_path
   function_name    = "user_cred_45_days"
   role             = aws_iam_role.lambda_role.arn
@@ -699,7 +699,7 @@ resource "aws_lambda_function" "lambda_function_user_cred_45_days" {
 }
 
 resource "aws_lambda_permission" "lambda_permission_user_cred_45_days" {
-  count    = var.notify_unused_cred_45_days ? 1 : 0
+  count         = var.notify_unused_cred_45_days ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_user_cred_45_days[0].arn
   principal     = "events.amazonaws.com"
@@ -707,14 +707,14 @@ resource "aws_lambda_permission" "lambda_permission_user_cred_45_days" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_45_days" {
-  count = var.notify_unused_cred_45_days ? 1 : 0
+  count               = var.notify_unused_cred_45_days ? 1 : 0
   name                = "lambda_trigger_user_cred_45_days"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred_45_days" {
-  count = var.notify_unused_cred_45_days ? 1 : 0
+  count     = var.notify_unused_cred_45_days ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days[0].name
   arn       = aws_lambda_function.lambda_function_user_cred_45_days[0].arn
   target_id = "lambda_target_user_cred_45_days"
@@ -733,7 +733,7 @@ resource "local_file" "lambda_code_user_cred_45_days_disable" {
 }
 
 data "archive_file" "lambda_zip_user_cred_45_days_disable" {
-  count    = var.disable_unused_cred_45_days ? 1 : 0
+  count       = var.disable_unused_cred_45_days ? 1 : 0
   depends_on  = [local_file.lambda_code_user_cred_45_days_disable]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -741,7 +741,7 @@ data "archive_file" "lambda_zip_user_cred_45_days_disable" {
 }
 
 resource "aws_lambda_function" "lambda_function_user_cred_45_days_disable" {
-  count    = var.disable_unused_cred_45_days ? 1 : 0
+  count            = var.disable_unused_cred_45_days ? 1 : 0
   filename         = data.archive_file.lambda_zip_user_cred_45_days_disable[0].output_path
   function_name    = "user_cred_45_days_disable"
   role             = aws_iam_role.lambda_role.arn
@@ -753,7 +753,7 @@ resource "aws_lambda_function" "lambda_function_user_cred_45_days_disable" {
 }
 
 resource "aws_lambda_permission" "lambda_permission_user_cred_45_days_disable" {
-  count    = var.disable_unused_cred_45_days ? 1 : 0
+  count         = var.disable_unused_cred_45_days ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_user_cred_45_days_disable[0].arn
   principal     = "events.amazonaws.com"
@@ -761,14 +761,14 @@ resource "aws_lambda_permission" "lambda_permission_user_cred_45_days_disable" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_45_days_disable" {
-  count = var.disable_unused_cred_45_days ? 1 : 0
+  count               = var.disable_unused_cred_45_days ? 1 : 0
   name                = "lambda_trigger_user_cred_45_days_disable"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred_45_days_disable" {
-  count = var.disable_unused_cred_45_days ? 1 : 0
+  count     = var.disable_unused_cred_45_days ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days_disable[0].name
   arn       = aws_lambda_function.lambda_function_user_cred_45_days_disable[0].arn
   target_id = "lambda_target_user_cred_45_days_disable"
@@ -884,7 +884,7 @@ resource "local_file" "lambda_code_expire_ssl_tls" {
 }
 
 data "archive_file" "lambda_zip_expire_ssl_tls" {
-  count    = var.remove_ssl_tls_iam ? 1 : 0
+  count       = var.remove_ssl_tls_iam ? 1 : 0
   depends_on  = [local_file.lambda_code_expire_ssl_tls]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -892,7 +892,7 @@ data "archive_file" "lambda_zip_expire_ssl_tls" {
 }
 
 resource "aws_lambda_function" "lambda_function_expire_ssl_tls" {
-  count    = var.remove_ssl_tls_iam ? 1 : 0
+  count            = var.remove_ssl_tls_iam ? 1 : 0
   filename         = data.archive_file.lambda_zip_expire_ssl_tls[0].output_path
   function_name    = "remove_expire_ssl_tls"
   role             = aws_iam_role.lambda_role.arn
@@ -904,7 +904,7 @@ resource "aws_lambda_function" "lambda_function_expire_ssl_tls" {
 }
 
 resource "aws_lambda_permission" "lambda_permission_expire_ssl_tls" {
-  count    = var.remove_ssl_tls_iam ? 1 : 0
+  count         = var.remove_ssl_tls_iam ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_expire_ssl_tls[0].arn
   principal     = "events.amazonaws.com"
@@ -912,14 +912,14 @@ resource "aws_lambda_permission" "lambda_permission_expire_ssl_tls" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_expire_ssl_tls" {
-  count = var.remove_ssl_tls_iam ? 1 : 0
+  count               = var.remove_ssl_tls_iam ? 1 : 0
   name                = "lambda_trigger_expire_ssl_tls"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_expire_ssl_tls" {
-  count = var.remove_ssl_tls_iam ? 1 : 0
+  count     = var.remove_ssl_tls_iam ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_expire_ssl_tls[0].name
   arn       = aws_lambda_function.lambda_function_expire_ssl_tls[0].arn
   target_id = "lambda_target_expire_ssl_tls"

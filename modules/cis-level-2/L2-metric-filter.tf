@@ -152,4 +152,3 @@ resource "aws_cloudwatch_metric_alarm" "aws_config_changes" {
 
   tags = var.tags
 }
-

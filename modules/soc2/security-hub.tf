@@ -1,5 +1,5 @@
 resource "aws_securityhub_account" "security-hub" {
-    count = var.enable_security_hub ? 1 : 0
+  count = var.enable_security_hub ? 1 : 0
 }
 
 resource "aws_securityhub_standards_subscription" "cis_v1" {

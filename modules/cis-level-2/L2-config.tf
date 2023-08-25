@@ -59,7 +59,7 @@ resource "aws_iam_role_policy_attachment" "recorder_read_policy" {
 }
 
 resource "aws_config_configuration_recorder" "recorder" {
-  
+
   count = var.config_enabled ? 1 : 0
 
   name = format("%s-config-recorder", var.name)

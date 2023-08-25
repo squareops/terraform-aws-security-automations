@@ -35,6 +35,26 @@ data "aws_iam_policy_document" "bucket_pol" {
       identifiers = ["guardduty.amazonaws.com"]
     }
   }
+  statement {
+    sid    = "DenyInsecureAccess"
+    effect = "Deny"
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    actions = ["s3:*"]
+    resources = [
+      "${aws_s3_bucket.gd_bucket[0].arn}",
+      "${aws_s3_bucket.gd_bucket[0].arn}/*"
+    ]
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+
 }
 
 data "aws_iam_policy_document" "kms_pol" {
@@ -73,32 +93,34 @@ data "aws_iam_policy_document" "kms_pol" {
 
 }
 
+
+
 resource "aws_guardduty_detector" "gd" {
-  count = var.enable_guard_duty ? 1 : 0
+  count  = var.enable_guard_duty ? 1 : 0
   enable = true
 }
 
 resource "aws_s3_bucket" "gd_bucket" {
-  count = var.enable_guard_duty ? 1 : 0
+  count         = var.enable_guard_duty ? 1 : 0
   bucket        = format("%s-gd-findingd-%s", var.name, data.aws_caller_identity.current.account_id)
   force_destroy = true
 }
 
 resource "aws_s3_bucket_policy" "gd_bucket_policy" {
-  count = var.enable_guard_duty ? 1 : 0
+  count  = var.enable_guard_duty ? 1 : 0
   bucket = aws_s3_bucket.gd_bucket[0].id
   policy = data.aws_iam_policy_document.bucket_pol[0].json
 }
 
 resource "aws_kms_key" "gd_key" {
-  count = var.enable_guard_duty ? 1 : 0
+  count                   = var.enable_guard_duty ? 1 : 0
   description             = "Temporary key for AccTest of TF"
   deletion_window_in_days = 7
   policy                  = data.aws_iam_policy_document.kms_pol[0].json
 }
 
 resource "aws_guardduty_publishing_destination" "gd_destination" {
-  count = var.enable_guard_duty ? 1 : 0
+  count           = var.enable_guard_duty ? 1 : 0
   detector_id     = aws_guardduty_detector.gd[0].id
   destination_arn = aws_s3_bucket.gd_bucket[0].arn
   kms_key_arn     = aws_kms_key.gd_key[0].arn
