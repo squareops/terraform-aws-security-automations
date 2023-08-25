@@ -1,4 +1,3 @@
-
 resource "aws_iam_account_password_policy" "cis" {
   #1.5 – Ensure IAM password policy requires at least one uppercase letter
   require_uppercase_characters = var.iam_require_uppercase_characters
@@ -24,4 +23,8 @@ resource "aws_iam_account_password_policy" "cis" {
   allow_users_to_change_password = var.iam_allow_users_to_change_password
 
   hard_expiry = var.iam_hard_expiry
+}
+
+resource "aws_ebs_encryption_by_default" "ebs-encryption" {
+  enabled = true
 }

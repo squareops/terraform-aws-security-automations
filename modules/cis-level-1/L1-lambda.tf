@@ -199,7 +199,7 @@ resource "aws_iam_policy" "mfa_policy" {
 
 
 data "template_file" "lambda_function_script_mfa_user" {
-  template = file("${path.module}/lambda_code/1.2_mfa_all_user.py")
+  template = file("${path.module}/L1-lambda/1.2_mfa_all_user.py")
   vars = {
     policy_arn = aws_iam_policy.mfa_policy.arn,
     mfa_iam_group = var.mfa_iam_group_name
@@ -251,7 +251,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_mfa_user" {
 # 1.4 Ensure access keys are rotated every 90 days or less
 data "template_file" "lambda_function_script_user_cred" {
   count    = var.disable_unused_cred_90_days ? 1 : 0
-  template = file("${path.module}/lambda_code/1.3_disable_user_cred.py")
+  template = file("${path.module}/L1-lambda/1.3_disable_user_cred.py")
 }
 resource "local_file" "lambda_code_user_cred" {
   count    = var.disable_unused_cred_90_days? 1 : 0
@@ -303,7 +303,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_user_cred" {
 
 # 1.16 Ensure IAM policies are attached only to groups or roles
 data "template_file" "lambda_function_script_direct_policy" {
-  template = file("${path.module}/lambda_code/1.16-remove-direct-policy.py")
+  template = file("${path.module}/L1-lambda/1.16-remove-direct-policy.py")
 }
 resource "local_file" "lambda_code_direct_policy" {
   content  = data.template_file.lambda_function_script_direct_policy.rendered
@@ -349,7 +349,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_direct_policy" {
 
 # 1.22 Ensure IAM policies that allow full "*:*" administrative privileges are not created
 data "template_file" "lambda_function_script_admin_policy" {
-  template = file("${path.module}/lambda_code/1.22_admin_policy.py")
+  template = file("${path.module}/L1-lambda/1.22_admin_policy.py")
   vars = {
     sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
   }
@@ -400,7 +400,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_admin_policy" {
 
 
 data "template_file" "lambda_function_script_remove_port_22" {
-  template = file("${path.module}/lambda_code/4.1_remove_port_22.py")
+  template = file("${path.module}/L1-lambda/4.1_remove_port_22.py")
 }
 resource "local_file" "lambda_code_remove_port_22" {
   content  = data.template_file.lambda_function_script_remove_port_22.rendered
@@ -449,7 +449,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_remove_port_22" {
 
 
 data "template_file" "lambda_function_script_remove_port_3389" {
-  template = file("${path.module}/lambda_code/4.2_remove_port_3389.py")
+  template = file("${path.module}/L1-lambda/4.2_remove_port_3389.py")
 }
 resource "local_file" "lambda_code_remove_port_3389" {
   content  = data.template_file.lambda_function_script_remove_port_3389.rendered
@@ -497,7 +497,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_remove_port_3389" {
 
 data "template_file" "lambda_function_active_access_key" {
   count    = var.multiple_access_key_notification ? 1 : 0
-  template = file("${path.module}/lambda_code/1.13_one_active_access_key_permissive.py")
+  template = file("${path.module}/L1-lambda/1.13_one_active_access_key_permissive.py")
   vars = {
     sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
   }
@@ -555,7 +555,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key" {
 
 data "template_file" "lambda_function_active_access_key_enforcing" {
   count    = var.multiple_access_key_deactivate ? 1 : 0
-  template = file("${path.module}/lambda_code/1.13_one_active_access_key_enforcing.py")
+  template = file("${path.module}/L1-lambda/1.13_one_active_access_key_enforcing.py")
 }
 
 resource "local_file" "lambda_code_active_access_key_enforcing" {
@@ -610,7 +610,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key_enforcing
 
 data "template_file" "lambda_function_script_user_cred_permissive" {
   count    = var.notify_unused_cred_90_days ? 1 : 0
-  template = file("${path.module}/lambda_code/1.3_disable_user_cred_permissive.py")
+  template = file("${path.module}/L1-lambda/1.3_disable_user_cred_permissive.py")
   vars = {
     sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
   }
@@ -667,7 +667,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_user_cred_permissive" {
 
 data "template_file" "lambda_function_script_user_cred_45_days" {
   count    = var.notify_unused_cred_45_days ? 1 : 0
-  template = file("${path.module}/lambda_code/1.12_notify_unused_cred_45_days.py")
+  template = file("${path.module}/L1-lambda/1.12_notify_unused_cred_45_days.py")
   vars = {
     sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
   }
@@ -724,7 +724,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_user_cred_45_days" {
 
 data "template_file" "lambda_function_script_user_cred_45_days_disable" {
   count    = var.disable_unused_cred_45_days ? 1 : 0
-  template = file("${path.module}/lambda_code/1.12_disable_user_cred_45_days.py")
+  template = file("${path.module}/L1-lambda/1.12_disable_user_cred_45_days.py")
 }
 resource "local_file" "lambda_code_user_cred_45_days_disable" {
   count    = var.disable_unused_cred_45_days ? 1 : 0
@@ -777,7 +777,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_user_cred_45_days_disable"
 ## Ensure that IAM Access analyzer is enabled for all regions
 
 data "template_file" "lambda_function_script_access_analyzer" {
-  template = file("${path.module}/lambda_code/1.20_access_analyzer.py")
+  template = file("${path.module}/L1-lambda/1.20_access_analyzer.py")
 }
 resource "local_file" "lambda_code_access_analyzer" {
   content  = data.template_file.lambda_function_script_access_analyzer.rendered
@@ -824,7 +824,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_access_analyzer" {
 ## Check for ssl tls certificate stored in IAM and send an email
 
 data "template_file" "lambda_function_script_ssl_tls_iam" {
-  template = file("${path.module}/lambda_code/1.19_check_ssl_tls_iam.py")
+  template = file("${path.module}/L1-lambda/1.19_check_ssl_tls_iam.py")
   vars = {
     sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
   }
@@ -875,7 +875,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_ssl_tls_iam" {
 
 data "template_file" "lambda_function_script_expire_ssl_tls" {
   count    = var.remove_ssl_tls_iam ? 1 : 0
-  template = file("${path.module}/lambda_code/1.19_remove_expired_ssl_iam.py")
+  template = file("${path.module}/L1-lambda/1.19_remove_expired_ssl_iam.py")
 }
 resource "local_file" "lambda_code_expire_ssl_tls" {
   count    = var.remove_ssl_tls_iam ? 1 : 0
@@ -928,7 +928,7 @@ resource "aws_cloudwatch_event_target" "lambda_target_expire_ssl_tls" {
 # acm certificate expiration check
 
 data "template_file" "lambda_function_script_acm_cert_expire" {
-  template = file("${path.module}/lambda_code/cc_6_7_acm_cert_expiration_check.py")
+  template = file("${path.module}/L1-lambda/cc_6_7_acm_cert_expiration_check.py")
   vars = {
     sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
   }

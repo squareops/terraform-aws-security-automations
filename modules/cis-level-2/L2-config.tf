@@ -1,3 +1,5 @@
+data "aws_caller_identity" "current" {}
+
 # 2.5 – Ensure AWS Config is enabled
 
 data "aws_iam_policy_document" "recorder_assume_role_policy" {
@@ -11,6 +13,7 @@ data "aws_iam_policy_document" "recorder_assume_role_policy" {
 }
 
 resource "aws_iam_role" "recorder" {
+  #count = var.check_level == "level-2" || var.check_level == "soc-2" ? 1 : 0
   name               = "${var.name}-config-role"
   assume_role_policy = data.aws_iam_policy_document.recorder_assume_role_policy.json
   tags               = var.tags
@@ -18,10 +21,10 @@ resource "aws_iam_role" "recorder" {
 
 #https://docs.aws.amazon.com/config/latest/developerguide/iamrole-permissions.html
 data "aws_iam_policy_document" "recorder_publish_policy" {
-  depends_on = [aws_s3_bucket.audit[0]]
+  #depends_on = [module.level-1.audit_bucket]
   statement {
     actions   = ["s3:PutObject"]
-    resources = ["${aws_s3_bucket.audit[0].arn}/config/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
+    resources = ["${var.audit_bucket_arn}/config/AWSLogs/${data.aws_caller_identity.current.account_id}/*"]
 
     condition {
       test     = "StringLike"
@@ -32,28 +35,31 @@ data "aws_iam_policy_document" "recorder_publish_policy" {
 
   statement {
     actions   = ["s3:GetBucketAcl"]
-    resources = [aws_s3_bucket.audit[0].arn]
+    resources = [var.audit_bucket_arn]
   }
 
   statement {
     actions = ["sns:Publish"]
 
-    resources = [aws_sns_topic.trail-unauthorised.arn]
+    resources = [var.sns_topic_arn]
   }
 }
 
 resource "aws_iam_role_policy" "recorder_publish_policy" {
+  #count = var.check_level == "level-2" || var.check_level == "soc-2" ? 1 : 0
   name   = "${var.name}-config-policy"
   role   = aws_iam_role.recorder.id
   policy = data.aws_iam_policy_document.recorder_publish_policy.json
 }
 
 resource "aws_iam_role_policy_attachment" "recorder_read_policy" {
+  #count      = var.check_level == "level-2" || var.check_level == "soc-2" ? 1 : 0
   role       = aws_iam_role.recorder.id
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWS_ConfigRole"
 }
 
 resource "aws_config_configuration_recorder" "recorder" {
+  
   count = var.config_enabled ? 1 : 0
 
   name = format("%s-config-recorder", var.name)
@@ -71,19 +77,15 @@ resource "aws_config_delivery_channel" "bucket" {
 
   name = format("%s-config-delivery", var.name)
 
-  s3_bucket_name = aws_s3_bucket.audit[0].id
+  s3_bucket_name = var.audit_bucket_id
   s3_key_prefix  = "config"
-  # s3_kms_key_arn = aws_kms_key.cloudtrail.arn
-  # sns_topic_arn  = aws_sns_topic.trail-unauthorised.arn
 
   snapshot_delivery_properties {
     delivery_frequency = "One_Hour"
   }
 
   depends_on = [
-    aws_config_configuration_recorder.recorder[0],
-    aws_s3_bucket_policy.audit_log[0],
-    aws_s3_bucket_public_access_block.audit[0]
+    aws_config_configuration_recorder.recorder[0]
   ]
 }
 

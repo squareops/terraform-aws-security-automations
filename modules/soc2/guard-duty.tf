@@ -1,5 +1,7 @@
 data "aws_region" "current" {}
 
+data "aws_caller_identity" "current" {}
+
 data "aws_iam_policy_document" "bucket_pol" {
   count = var.enable_guard_duty ? 1 : 0
   statement {
