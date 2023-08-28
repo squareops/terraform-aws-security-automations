@@ -6,6 +6,8 @@ Welcome to the AWS Security Checks Module! This module is designed to perform se
 
 The AWS Security Checks Module is a powerful tool for automating the process of auditing and validating AWS accounts against common security benchmarks. It provides a structured framework for performing CIS Level 1, CIS Level 2, and SOC 2 compliance checks.
 
+## Important note
+
 For acheiving 100% compliant for AWS Infrastructure we need to perform some manual checks which are listed in the respective directory of cis-levels.
 
 ## Features
@@ -41,27 +43,16 @@ The `examples` folder contains terraform code to call compliance checks based on
 - To perform CIS Level 1, Level 2 and soc2 check input the value of variable `check_level`. Please refer the below example.
 
 ``` bash
-locals {
-  region      = "us-east-1"
-  environment = "prod"
-  name        = "skaf"
-  additional_tags = {
-    Owner      = "organization_name"
-    Expires    = "Never"
-    Department = "Engineering"
-  }
-  check_level = "" ## enter cis check level cis-level-1 or cis-level-2 or soc2 for ahieving desired compliance
-}
 
 module "cis" {
 
   source = "../../"
 
-  name                             = local.name
-  region                           = local.region
+  name                             = "skaf"
+  region                           = "us-east-1"
   email                            = "skaf-demo@squareops.com"
   cron_expression                  = "cron(0 22 1,10,20,28 * ? 2023)"
-  check_level                      = local.check_level
+  check_level                      = "" ##Enter check level (level-1 or level-2 or soc2)
   s3_enabled                       = true
   config_enabled                   = true
   include_global_resource_types    = false
@@ -146,3 +137,42 @@ module "cis" {
 | <a name="input_remove_ssl_tls_iam"></a> [remove\_ssl\_tls\_iam](#input\_remove\_ssl\_tls\_iam) | Remove expire ssl tls cert from IAM | `bool` | `false` | no |
 | <a name="input_s3_enabled"></a> [s3\_enabled](#input\_s3\_enabled) | Set it true to export logs of CloudTrail to S3 Bucket | `bool` | `true` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to be used in all the resources | `map(string)` | <pre>{<br>  "key": "AWS_CIS_Benchmark",<br>  "value": "1.2.0"<br>}</pre> | no |
+
+## Contribution & Issue Reporting
+
+To report an issue with a project:
+
+  1. Check the repository's [issue tracker](https://github.com/sq-ia/terraform-aws-cis-level1/issues) on GitHub
+  2. Search to see if the issue has already been reported
+  3. If you can't find an answer to your question in the documentation or issue tracker, you can ask a question by creating a new issue. Be sure to provide enough context and details so others can understand your problem.
+
+## License
+
+Apache License, Version 2.0, January 2004 (http://www.apache.org/licenses/).
+
+## Support Us
+
+To support a GitHub project by liking it, you can follow these steps:
+
+  1. Visit the repository: Navigate to the [GitHub repository](https://github.com/sq-ia/terraform-aws-cis-level1).
+
+  2. Click the "Star" button: On the repository page, you'll see a "Star" button in the upper right corner. Clicking on it will star the repository, indicating your support for the project.
+
+  3. Optionally, you can also leave a comment on the repository or open an issue to give feedback or suggest changes.
+
+Starring a repository on GitHub is a simple way to show your support and appreciation for the project. It also helps to increase the visibility of the project and make it more discoverable to others.
+
+## Who we are
+
+We believe that the key to success in the digital age is the ability to deliver value quickly and reliably. That’s why we offer a comprehensive range of DevOps & Cloud services designed to help your organization optimize its systems & Processes for speed and agility.
+
+  1. We are an AWS Advanced consulting partner which reflects our deep expertise in AWS Cloud and helping 100+ clients over the last 5 years.
+  2. Expertise in Kubernetes and overall container solution helps companies expedite their journey by 10X.
+  3. Infrastructure Automation is a key component to the success of our Clients and our Expertise helps deliver the same in the shortest time.
+  4. DevSecOps as a service to implement security within the overall DevOps process and helping companies deploy securely and at speed.
+  5. Platform engineering which supports scalable,Cost efficient infrastructure that supports rapid development, testing, and deployment.
+  6. 24*7 SRE service to help you Monitor the state of your infrastructure and eradicate any issue within the SLA.
+
+We provide [support](https://squareops.com/contact-us/) on all of our projects, no matter how small or large they may be.
+
+To find more information about our company, visit [squareops.com](https://squareops.com/), follow us on [Linkedin](https://www.linkedin.com/company/squareops-technologies-pvt-ltd/), or fill out a [job application](https://squareops.com/careers/). If you have any questions or would like assistance with your cloud strategy and implementation, please don't hesitate to [contact us](https://squareops.com/contact-us/).

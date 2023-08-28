@@ -1,13 +1,13 @@
 locals {
   region      = "us-east-1"
   environment = "prod"
-  name        = "skaf"
+  name        = "skaf-ak"
   additional_tags = {
     Owner      = "organization_name"
     Expires    = "Never"
     Department = "Engineering"
   }
-  check_level = "" ## enter cis check level level-1 or level-2 or soc2 for ahieving desired compliance
+  check_level = "soc2" ## enter cis check level level-1 or level-2 or soc2 for ahieving desired compliance
 }
 
 module "cis" {
@@ -21,7 +21,7 @@ module "cis" {
   check_level                      = local.check_level
   s3_enabled                       = true
   config_enabled                   = true
-  include_global_resource_types    = false
+  include_global_resource_types    = true
   cw_log_enabled                   = true
   alerting_enabled                 = true
   multiple_access_key_notification = true
