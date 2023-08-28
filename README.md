@@ -15,33 +15,26 @@ For acheiving 100% compliant for AWS Infrastructure we need to perform some manu
 - Customizable configurations to adapt to different environments.
 - Automated and repeatable security assessment process.
 
-## Folder Structure
+## Directory Structure
 
-The module is organized into the following folders:
+The module is organized into the following directory:
 
 - `cis-level-1`: Contains code for CIS Level 1 compliance checks.
 - `cis-level-2`: Contains code for CIS Level 2 compliance checks.
 - `soc2`: Contains code for SOC 2 compliance checks.
 - `examples`: Contains example scripts to call compliance checks based on the desired level.
 
-Each folder contains scripts and configuration files specific to the corresponding security framework.
+Each folder contains configuration files specific to the corresponding security framework.
 
 ## Getting Started
 
 To get started with the AWS Security Checks Module, follow these steps:
 
-1. Clone the repository to your local machine: `git clone https://github.com/your-username/your-module.git`
+1. Clone the repository to your local machine: `git clone https://sq-ia//terraform-aws-cis-level1.git`
 2. Navigate to the desired framework folder (`cis-level-1`, `cis-level-2`, or `soc2`).
 3. Review the documentation for each check to understand its purpose and requirements.
 
 ## Usage
-
-1. Choose the appropriate framework folder based on the compliance level you want to assess (`cis-level-1`, `cis-level-2`, or `soc2`).
-2. Review the documentation for each check in that folder to understand its purpose, requirements, and potential impact.
-3. Modify the configuration files to match your AWS environment, if necessary.
-4. Execute the provided scripts to perform compliance checks on your AWS account.
-
-### Calling Compliance Checks
 
 The `examples` folder contains terraform code to call compliance checks based on the desired level:
 
