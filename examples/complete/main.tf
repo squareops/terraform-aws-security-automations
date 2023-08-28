@@ -7,7 +7,7 @@ locals {
     Expires    = "Never"
     Department = "Engineering"
   }
-  check_level = "soc2" ## enter cis check level level-1 or level-2 or soc2 for ahieving desired compliance
+  check_level = "" ## enter cis check level level-1 or level-2 or soc2 for ahieving desired compliance
 }
 
 module "cis" {

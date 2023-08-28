@@ -1,9 +1,84 @@
-# cis-level-1
+# AWS CIS Level 1 Security Compliance Checks
+
+This repository contains automated and manual checks to assess the security compliance of your AWS environment based on the Center for Internet Security (CIS) AWS Foundations Benchmark Level 1.
+
+## Introduction
+
+The CIS AWS Foundations Benchmark provides best practice guidelines for securing your AWS resources. This repository includes a set of automated and manual checks that align with the CIS Level 1 recommendations. These checks help ensure that your AWS environment follows the recommended security configurations.
+
+## Automated checks covered
+
+We have developed a set of automated checks using infrastructure-as-code (IAC). These checks assess various AWS services and resources to ensure they are configured according to CIS Level 1 requirements.
+
+- Ensure IAM password policy requires minimum length of 14 or
+greater 
+- Ensure IAM password policy prevents password reuse .
+- Ensure credentials unused for 45 days or greater are
+disabled
+- Ensure there is only one active access key available for any
+single IAM user.
+- Ensure access keys are rotated every 90 days or less.
+- Ensure IAM Users Receive Permissions Only Through
+Groups.
+- Ensure IAM policies that allow full "*:*" administrative
+privileges are not attached.
+- Ensure a support role has been created to manage incidents
+with AWS Support.
+- Ensure that all the expired SSL/TLS certificates stored in
+AWS IAM are removed.
+- Ensure that IAM Access analyzer is enabled for all regions
+- Ensure that S3 Buckets are configured with 'Block public
+access.
+- Ensure EBS Volume Encryption is Enabled.
+- Ensure that encryption-at-rest is enabled for RDS Instances.
+- Ensure Auto Minor Version Upgrade feature is Enabled for
+RDS Instances.
+- Ensure that public access is not given to RDS Instance.
+- Ensure that encryption is enabled for EFS file systems.
+- Ensure CloudTrail is enabled in all regions.
+- Ensure the S3 bucket used to store CloudTrail logs is not
+publicly accessible.
+- Ensure CloudTrail trails are integrated with CloudWatch Logs.
+- Ensure S3 bucket access logging is enabled on the CloudTrail
+S3 bucket.
+- Ensure a log metric filter and alarm exist for unauthorized API calls.
+- Ensure a log metric filter and alarm exist for changes to network gateways.
+- Ensure a log metric filter and alarm exist for route table changes.
+- Ensure a log metric filter and alarm exist for VPC changes.
+- Ensure a log metric filter and alarm exists for AWS Organizations changes.
+- Ensure a log metric filter and alarm exist for Management Console sign-in without MFA.
+- Ensure a log metric filter and alarm exist for usage of 'root' account
+- Ensure a log metric filter and alarm exist for IAM policy changes.
+- Ensure a log metric filter and alarm exist for CloudTrail configuration changes.
+- Ensure a log metric filter and alarm exist for S3 bucket policy changes.
+- Ensure no Network ACLs allow ingress from 0.0.0.0/0 to remote server administration ports.
+- Ensure no security groups allow ingress from 0.0.0.0/0 to remote server administration ports.
+
+## Manual Checks
+
+In addition to automated checks, this repository provides a list of manual checks that require human validation. These checks cover areas where automated validation might not be feasible or practical.
+
+- Maintain current contact details.
+- Ensure security contact information is registered.
+- Ensure security questions are registered in the AWS account
+- Ensure no 'root' user account access key exists.
+- Ensure MFA is enabled for the 'root' user account.
+- Eliminate use of the 'root' user for administrative and daily
+tasks
+- Ensure multi-factor authentication (MFA) is enabled for all
+IAM users that have a console password.
+- Do not setup access keys during initial user setup for all IAM
+users that have a console password.
+- Ensure access to AWSCloudShellFullAccess is restricted.
+- Ensure management console sign-in without MFA is
+monitored
+- Ensure MFA Delete is enabled on S3 buckets.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
 
 No requirements.
+
 
 ## Providers
 

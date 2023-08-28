@@ -1,4 +1,42 @@
-# cis-level-2
+# AWS CIS Level 2 Security Compliance Checks
+
+This repository contains automated and manual checks to assess the security compliance of your AWS environment based on the Center for Internet Security (CIS) AWS Foundations Benchmark Level 2.
+
+## Introduction
+
+The CIS AWS Foundations Benchmark provides best practice guidelines for securing your AWS resources. This repository includes a set of automated and manual checks that align with the CIS Level 2 recommendations. These checks help ensure that your AWS environment follows the recommended security configurations.
+
+## Automated checks covered
+
+We have developed a set of automated checks using infrastructure-as-code (IAC). These checks assess various AWS services and resources to ensure they are configured according to CIS Level 2 requirements.
+
+- Ensure AWS Config is enabled in all regions.
+- Ensure all S3 buckets employ encryption-at-rest.
+- Ensure IAM instance roles are used for AWS resource access from instances.
+- Ensure CloudTrail log file validation is enabled.
+- Ensure VPC flow logging is enabled in all VPCs.
+- Ensure that Object-level logging for write events is enabled for S3 bucket.
+- Ensure that Object-level logging for read events is enabled for S3 bucket.
+- Ensure S3 Bucket Policy is set to deny HTTP requests.
+- Ensure all data in Amazon S3 has been discovered, classified and secured when required.
+- Ensure CloudTrail logs are encrypted at rest using KMS CMKs.
+- Ensure rotation for customer created symmetric CMKs is enabled.
+- Ensure VPC flow logging is enabled in all VPCs.
+- Ensure a log metric filter and alarm exist for security group changes.
+- Ensure a log metric filter and alarm exist for changes to Network Access Control Lists (NACL).
+- Ensure a log metric filter and alarm exist for AWS Management Console authentication failures.
+- Ensure a log metric filter and alarm exist for disabling or scheduled deletion of customer created CMKs.
+- Ensure a log metric filter and alarm exist for AWS Config configuration changes.
+
+## Manual Checks
+
+In addition to automated checks, this repository provides a list of manual checks that require human validation. These checks cover areas where automated validation might not be feasible or practical.
+
+- Ensure hardware MFA is enabled for the 'root' user account
+- Ensure IAM users are managed centrally via identity federation or AWS Organizations for multi-account environments.
+- Ensure MFA Delete is enabled on S3 buckets.
+- Ensure the default security group of every VPC restricts all traffic.
+- Ensure routing tables for VPC peering are \"least access\.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements

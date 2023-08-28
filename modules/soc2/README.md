@@ -1,4 +1,26 @@
-# soc2
+# SOC 2 Compliance checks
+
+This repository contains checks to assess the security compliance of your AWS environment based on the service organisation control 2 (soc2). It outlines the controls we have implemented to meet the requirements of SOC 2.
+
+## Introduction
+
+SOC 2 (Service Organization Control 2) is a widely recognized framework for assessing the security, availability, processing integrity, confidentiality, and privacy of systems and data. This repository serves as a central source of information regarding our SOC 2 compliance.
+
+## Checks covered
+
+We have developed a set of checks using infrastructure-as-code (IAC). These checks assess various AWS services and resources to ensure they are configured according to soc2 requirements.
+
+- Guardduty is enabled.
+- ACM certificates expiration check.
+- Security hub is enabled.
+- EC2 instance managed by ssm.
+- Cloudwatch log group retention policy specific days enabled.
+- Cloudwatch log group kms encryption enabled.
+- Dynamodb tables point in time recovery enable.
+- EFS have backup enabled.
+- Elastic load balancer logging enabled.
+- EC2 instance imdsv2 enabled.
+- RDS instance deletion protection is enabled.
 
 <!-- BEGINNING OF PRE-COMMIT-TERRAFORM DOCS HOOK -->
 ## Requirements
