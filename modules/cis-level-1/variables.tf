@@ -35,7 +35,7 @@ variable "cw_log_enabled" {
   description = "Set it to true to aggregate logs on CloudWatch"
 }
 
-variable "cloudwatch_logs_kms_id" {
+variable "cloudwatch_logs_kms_key_arn" {
   type        = string
   default     = ""
   description = "KMS key for CloudWatch Logs Encryption"
@@ -182,4 +182,10 @@ variable "mfa_iam_group_name" {
   type        = string
   default     = "test-user-group"
   description = "Enter the user group name in which you want to add mfa user policy"
+}
+
+variable "cloudwatch_log_group_retention_days" {
+  type        = number
+  default     = 30
+  description = "Enter the number of days in which you want your cloud watch log group for cloudtrail will got expired"
 }

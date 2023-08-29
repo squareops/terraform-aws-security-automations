@@ -1,6 +1,7 @@
 resource "aws_cloudwatch_log_group" "cloudtrail_events" {
   name       = format("%s-cloudtrail-log-group", var.name)
-  kms_key_id = var.cloudwatch_logs_kms_id
+  kms_key_id = var.cloudwatch_logs_kms_key_arn
+  retention_in_days = var.cloudwatch_log_group_retention_days
   tags       = var.tags
 }
 

@@ -12,6 +12,8 @@ module "cis-level-1" {
   disable_unused_cred_90_days    = var.disable_unused_cred_90_days
   disable_unused_cred_45_days    = var.disable_unused_cred_45_days
   remove_ssl_tls_iam             = var.remove_ssl_tls_iam
+  cloudwatch_logs_kms_key_arn    = var.cloudwatch_logs_kms_key_arn
+  cloudwatch_log_group_retention_days = var.cloudwatch_log_group_retention_days
 }
 
 module "cis-level-2" {
