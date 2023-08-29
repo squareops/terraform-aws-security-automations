@@ -27,3 +27,13 @@ output "aws_s3_bucket_public_access_block" {
   description = "S3 bucket for storing audit logs of config."
   value       = aws_s3_bucket_public_access_block.access_log[0].id
 }
+
+output "access_log_bucket_id" {
+  description = "S3 bucket for storing access logs of config."
+  value       = aws_s3_bucket.access_log[0].id
+}
+
+output "access_log_bucket_arn" {
+  description = "S3 bucket for storing access logs of config."
+  value       = aws_s3_bucket.access_log[0].arn
+}

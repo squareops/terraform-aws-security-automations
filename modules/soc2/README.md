@@ -68,5 +68,8 @@ No modules.
 
 ## Outputs
 
-No outputs.
+| Name | Description |
+|------|-------------|
+| <a name="output_guardduty_bucket_arn"></a> [guardduty\_bucket\_arn](#output\_guardduty\_bucket\_arn) | S3 bucket for storing guardduty findings. |
+| <a name="output_guardduty_bucket_id"></a> [guardduty\_bucket\_id](#output\_guardduty\_bucket\_id) | S3 bucket for storing guardduty findings. |
 <!-- END OF PRE-COMMIT-TERRAFORM DOCS HOOK -->

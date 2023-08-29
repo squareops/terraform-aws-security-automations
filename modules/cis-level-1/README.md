@@ -11,7 +11,7 @@ The CIS AWS Foundations Benchmark provides best practice guidelines for securing
 We have developed a set of automated checks using infrastructure-as-code (IAC). These checks assess various AWS services and resources to ensure they are configured according to CIS Level 1 requirements.
 
 - Ensure IAM password policy requires minimum length of 14 or
-greater 
+greater
 - Ensure IAM password policy prevents password reuse .
 - Ensure credentials unused for 45 days or greater are
 disabled
@@ -78,7 +78,6 @@ monitored
 ## Requirements
 
 No requirements.
-
 
 ## Providers
 
@@ -299,6 +298,8 @@ No modules.
 
 | Name | Description |
 |------|-------------|
+| <a name="output_access_log_bucket_arn"></a> [access\_log\_bucket\_arn](#output\_access\_log\_bucket\_arn) | S3 bucket for storing access logs of config. |
+| <a name="output_access_log_bucket_id"></a> [access\_log\_bucket\_id](#output\_access\_log\_bucket\_id) | S3 bucket for storing access logs of config. |
 | <a name="output_audit_bucket_arn"></a> [audit\_bucket\_arn](#output\_audit\_bucket\_arn) | S3 bucket for storing audit logs of config. |
 | <a name="output_audit_bucket_id"></a> [audit\_bucket\_id](#output\_audit\_bucket\_id) | S3 bucket for storing audit logs of config. |
 | <a name="output_aws_s3_bucket_policy"></a> [aws\_s3\_bucket\_policy](#output\_aws\_s3\_bucket\_policy) | S3 bucket for storing audit logs of config. |
