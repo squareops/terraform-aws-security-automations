@@ -16,25 +16,25 @@ def send_email_notification(user_name):
 
 def lambda_handler(event, context):
     iam_client = boto3.client('iam')
-    
+
     # Get all IAM users
     response = iam_client.list_users()
     users = response['Users']
-    
+
     # Iterate over each user
     for user in users:
         username = user['UserName']
-        
+
         # Get all access keys for the user
         response = iam_client.list_access_keys(UserName=username)
         access_keys = response['AccessKeyMetadata']
-        
+
         # Check if the user has more than one active access key
         active_keys = [key for key in access_keys if key['Status'] == 'Active']
         if len(active_keys) > 1:
             # Send email notification about multiple active access keys
             send_email_notification(username)
-    
+
     return {
         'statusCode': 200,
         'body': 'Email notifications sent for IAM users with multiple active access keys'

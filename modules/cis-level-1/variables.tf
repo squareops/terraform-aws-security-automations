@@ -28,21 +28,7 @@ variable "audit_log_bucket_custom_policy_json" {
   description = "Override cusom policy for S3 Logging bucket"
 }
 
-#AWS Config
-variable "config_enabled" {
-  type        = bool
-  default     = true
-  description = "Set it to true to enable AWS Config"
-}
-
-variable "include_global_resource_types" {
-  type        = bool
-  default     = true
-  description = "Set it to true to enable recording of global resources in AWS Config"
-}
-
 # CloudTrail
-
 variable "cw_log_enabled" {
   type        = bool
   default     = true
@@ -192,26 +178,8 @@ variable "remove_ssl_tls_iam" {
   description = "Remove expire ssl tls cert from IAM"
 }
 
-variable "enable_guard_duty" {
-  type        = bool
-  default     = true
-  description = "This will enable guard duty"
-}
-
-variable "enable_security_hub" {
-  type        = bool
-  default     = true
-  description = "This will security hub"
-}
-
 variable "mfa_iam_group_name" {
   type        = string
   default     = "test-user-group"
   description = "Enter the user group name in which you want to add mfa user policy"
-}
-
-variable "check_level" {
-  type        = string
-  default     = ""
-  description = "CIS level-2 checks deployment"
 }

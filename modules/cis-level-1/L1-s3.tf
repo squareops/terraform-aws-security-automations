@@ -57,13 +57,63 @@ data "aws_iam_policy_document" "audit_log" {
       values   = ["bucket-owner-full-control"]
     }
   }
+  statement {
+    sid    = "DenyInsecureAccess"
+    effect = "Deny"
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    actions = ["s3:*"]
+    resources = [
+      "${aws_s3_bucket.audit[0].arn}",
+      "${aws_s3_bucket.audit[0].arn}/*"
+    ]
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+
 }
 
+data "aws_iam_policy_document" "access_log_policy" {
+  count = var.s3_enabled ? 1 : 0
+
+  statement {
+    sid    = "DenyInsecureAccess"
+    effect = "Deny"
+    principals {
+      type        = "*"
+      identifiers = ["*"]
+    }
+    actions = ["s3:*"]
+    resources = [
+      "${aws_s3_bucket.access_log[0].arn}",
+      "${aws_s3_bucket.access_log[0].arn}/*"
+    ]
+
+    condition {
+      test     = "Bool"
+      variable = "aws:SecureTransport"
+      values   = ["false"]
+    }
+  }
+}
 resource "aws_s3_bucket_policy" "audit_log" {
   depends_on = [aws_s3_bucket_public_access_block.audit]
   count      = var.s3_enabled ? 1 : 0
   bucket     = aws_s3_bucket.audit[0].id
   policy     = data.aws_iam_policy_document.audit_log[0].json
+}
+
+resource "aws_s3_bucket_policy" "access_log_bucket" {
+  depends_on = [aws_s3_bucket_public_access_block.access_log]
+  count      = var.s3_enabled ? 1 : 0
+  bucket     = aws_s3_bucket.access_log[0].id
+  policy     = data.aws_iam_policy_document.access_log_policy[0].json
 }
 
 resource "aws_s3_bucket" "access_log" {

@@ -5,7 +5,7 @@ resource "aws_cloudwatch_log_group" "cloudtrail_events" {
 }
 
 data "aws_iam_policy_document" "cloudtrail_key_policy" {
-  policy_id     = "Key policy created by CloudTrail"
+  policy_id = "Key policy created by CloudTrail"
   #override_json = var.cloudtrail_kms_policy
 
   statement {

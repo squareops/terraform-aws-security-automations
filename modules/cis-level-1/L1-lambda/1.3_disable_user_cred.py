@@ -5,7 +5,7 @@ import time
 
 def lambda_handler(event, context):
     iam = boto3.client('iam')
-    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=45)
+    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=90)
 
     users = iam.list_users()['Users']
     for user in users:
