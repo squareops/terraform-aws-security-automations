@@ -22,7 +22,3 @@ output "access_log_bucket_arn" {
   description = "access log bucket arn"
   value       = module.cis.access_log_bucket_id
 }
-
-
-
-

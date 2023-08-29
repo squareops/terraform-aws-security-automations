@@ -1,18 +1,18 @@
 data "aws_region" "current" {}
 
 module "cis-level-1" {
-  source                         = "./modules/cis-level-1"
-  name                           = var.name
-  region                         = data.aws_region.current.name
-  email                          = var.email
-  mfa_iam_group_name             = var.mfa_iam_group_name
-  s3_enabled                     = var.s3_enabled
-  cw_log_enabled                 = var.cw_log_enabled
-  multiple_access_key_deactivate = var.multiple_access_key_deactivate
-  disable_unused_cred_90_days    = var.disable_unused_cred_90_days
-  disable_unused_cred_45_days    = var.disable_unused_cred_45_days
-  remove_ssl_tls_iam             = var.remove_ssl_tls_iam
-  cloudwatch_logs_kms_key_arn    = var.cloudwatch_logs_kms_key_arn
+  source                              = "./modules/cis-level-1"
+  name                                = var.name
+  region                              = data.aws_region.current.name
+  email                               = var.email
+  mfa_iam_group_name                  = var.mfa_iam_group_name
+  s3_enabled                          = var.s3_enabled
+  cw_log_enabled                      = var.cw_log_enabled
+  multiple_access_key_deactivate      = var.multiple_access_key_deactivate
+  disable_unused_cred_90_days         = var.disable_unused_cred_90_days
+  disable_unused_cred_45_days         = var.disable_unused_cred_45_days
+  remove_ssl_tls_iam                  = var.remove_ssl_tls_iam
+  cloudwatch_logs_kms_key_arn         = var.cloudwatch_logs_kms_key_arn
   cloudwatch_log_group_retention_days = var.cloudwatch_log_group_retention_days
 }
 
