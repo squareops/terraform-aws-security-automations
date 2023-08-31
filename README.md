@@ -10,6 +10,40 @@ The AWS Security Checks Module is a powerful tool for automating the process of 
 
 For acheiving 100% compliant for AWS Infrastructure we need to perform some manual checks which are listed in the respective directory of cis-levels.
 
+For encrypting cloudwatch log group of cloudtrail please use this KMS key policy. Please change the account id and region.
+
+```
+{
+    "Version": "2012-10-17",
+    "Id": "allow-cloudwatch-logs-encryption",
+    "Statement": [
+        {
+            "Sid": "AllowRootFullPermissions",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::12345678:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowCloudWatchLogsEncryption",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "logs.us-east-2.amazonaws.com"
+            },
+            "Action": [
+                "kms:Encrypt*",
+                "kms:Decrypt*",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
 ## Features
 
 - Pre-configured checks for CIS Level 1, CIS Level 2, and SOC 2 security benchmarks.
@@ -48,26 +82,29 @@ module "cis" {
 
   source = "../../"
 
-  name                             = "skaf"
-  region                           = "us-east-1"
-  email                            = "skaf-demo@squareops.com"
-  cron_expression                  = "cron(0 22 1,10,20,28 * ? 2023)"
-  check_level                      = "" ##Enter check level (level-1 or level-2 or soc2)
-  s3_enabled                       = true
-  config_enabled                   = true
-  include_global_resource_types    = false
-  cw_log_enabled                   = true
-  alerting_enabled                 = true
-  multiple_access_key_notification = true
-  multiple_access_key_deactivate   = false
-  disable_unused_cred_90_days      = false
-  notify_unused_cred_90_days       = true
-  notify_unused_cred_45_days       = true
-  disable_unused_cred_45_days      = false
-  remove_ssl_tls_iam               = false
-  enable_guard_duty                = true
-  enable_security_hub              = true
-  mfa_iam_group_name               = "" ## Enter your IAM user group name
+  name                                = "skaf"
+  region                              = "us-east-1"
+  email                               = "skaf-demo@squareops.com"
+  cron_expression                     = "cron(0 22 1,10,20,28 * ? 2023)"
+  check_level                         = "soc2" ##Enter check level (level-1 or level-2 or soc2)
+  s3_enabled                          = true
+  config_enabled                      = true
+  include_global_resource_types       = true
+  cw_log_enabled                      = true
+  alerting_enabled                    = true
+  multiple_access_key_notification    = true
+  multiple_access_key_deactivate      = false
+  disable_unused_cred_90_days         = false
+  notify_unused_cred_90_days          = true
+  notify_unused_cred_45_days          = true
+  disable_unused_cred_45_days         = false
+  remove_ssl_tls_iam                  = false
+  enable_guard_duty                   = true
+  enable_security_hub                 = true
+  enable_aws_macie                    = true
+  mfa_iam_group_name                  = "mfa-group" ## enter your IAM user group for mfa
+  cloudwatch_logs_kms_key_arn         = "arn:aws:kms:us-east-2:222222222222:key/kms_key_arn" ## enter kms key arn for encrypting cloudwatch log group of cloud trail
+  cloudwatch_log_group_retention_days = 60
 }
 
 ```
@@ -213,13 +250,15 @@ To find more information about our company, visit [squareops.com](https://square
 | <a name="input_check_level"></a> [check\_level](#input\_check\_level) | CIS level-2 checks deployment | `string` | `""` | no |
 | <a name="input_cloudtrail_event_selector_type"></a> [cloudtrail\_event\_selector\_type](#input\_cloudtrail\_event\_selector\_type) | Types of events that will be aggregated in CloudTrail | `string` | `"All"` | no |
 | <a name="input_cloudtrail_kms_policy"></a> [cloudtrail\_kms\_policy](#input\_cloudtrail\_kms\_policy) | KMS policy for Cloudtrail Logs | `string` | `""` | no |
-| <a name="input_cloudwatch_logs_kms_id"></a> [cloudwatch\_logs\_kms\_id](#input\_cloudwatch\_logs\_kms\_id) | KMS key for CloudWatch Logs Encryption | `string` | `""` | no |
+| <a name="input_cloudwatch_log_group_retention_days"></a> [cloudwatch\_log\_group\_retention\_days](#input\_cloudwatch\_log\_group\_retention\_days) | Enter the number of days in which you want your cloud watch log group for cloudtrail will got expired | `number` | `30` | no |
+| <a name="input_cloudwatch_logs_kms_key_arn"></a> [cloudwatch\_logs\_kms\_key\_arn](#input\_cloudwatch\_logs\_kms\_key\_arn) | KMS key for CloudWatch Logs Encryption | `string` | `""` | no |
 | <a name="input_config_enabled"></a> [config\_enabled](#input\_config\_enabled) | Set it to true to enable AWS Config | `bool` | `true` | no |
 | <a name="input_cron_expression"></a> [cron\_expression](#input\_cron\_expression) | Expession to trigger lambda function regularly on the schedule | `string` | `"cron(0 22 1,10,20,28 * ? 2023)"` | no |
 | <a name="input_cw_log_enabled"></a> [cw\_log\_enabled](#input\_cw\_log\_enabled) | Set it to true to aggregate logs on CloudWatch | `bool` | `true` | no |
 | <a name="input_disable_unused_cred_45_days"></a> [disable\_unused\_cred\_45\_days](#input\_disable\_unused\_cred\_45\_days) | It will disable cred for more than 45 days | `bool` | `false` | no |
 | <a name="input_disable_unused_cred_90_days"></a> [disable\_unused\_cred\_90\_days](#input\_disable\_unused\_cred\_90\_days) | It will deactivate the newly created active access key | `bool` | `false` | no |
 | <a name="input_email"></a> [email](#input\_email) | Email address that can receive notifications from Amazon SNS | `string` | `""` | no |
+| <a name="input_enable_aws_macie"></a> [enable\_aws\_macie](#input\_enable\_aws\_macie) | Enable aws macie | `bool` | `true` | no |
 | <a name="input_enable_guard_duty"></a> [enable\_guard\_duty](#input\_enable\_guard\_duty) | This will enable guard duty | `bool` | `true` | no |
 | <a name="input_enable_security_hub"></a> [enable\_security\_hub](#input\_enable\_security\_hub) | This will security hub | `bool` | `true` | no |
 | <a name="input_iam_allow_users_to_change_password"></a> [iam\_allow\_users\_to\_change\_password](#input\_iam\_allow\_users\_to\_change\_password) | Set it to true to allow users to change their own password | `bool` | `true` | no |

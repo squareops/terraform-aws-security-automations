@@ -68,3 +68,9 @@ variable "cloud_watch_log_group" {
   default     = ""
   description = "cloudwatch log group for metric filter"
 }
+
+variable "enable_aws_macie" {
+  type        = bool
+  default     = true
+  description = "Enable aws macie"
+}

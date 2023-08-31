@@ -253,3 +253,9 @@ resource "aws_cloudwatch_metric_alarm" "aws_config_changes" {
 
   tags = var.tags
 }
+
+## Enable aws macie
+
+resource "aws_macie2_account" "aws-macie" {
+  count = var.enable_aws_macie ? 1 : 0
+}

@@ -49,7 +49,7 @@ variable "cw_log_enabled" {
   description = "Set it to true to aggregate logs on CloudWatch"
 }
 
-variable "cloudwatch_logs_kms_id" {
+variable "cloudwatch_logs_kms_key_arn" {
   type        = string
   default     = ""
   description = "KMS key for CloudWatch Logs Encryption"
@@ -214,4 +214,16 @@ variable "check_level" {
   type        = string
   default     = ""
   description = "CIS level-2 checks deployment"
+}
+
+variable "cloudwatch_log_group_retention_days" {
+  type        = number
+  default     = 30
+  description = "Enter the number of days in which you want your cloud watch log group for cloudtrail will got expired"
+}
+
+variable "enable_aws_macie" {
+  type        = bool
+  default     = true
+  description = "Enable aws macie"
 }
