@@ -1,13 +1,13 @@
 locals {
   region      = "us-east-1"
   environment = "prod"
-  name        = "skaf-ak"
+  name        = "skaf"
   additional_tags = {
     Owner      = "organization_name"
     Expires    = "Never"
     Department = "Engineering"
   }
-  check_level = "soc2" ## enter cis check level level-1 or level-2 or soc2 for ahieving desired compliance
+  check_level = "" ## enter cis check level level-1 or level-2 or soc2 for ahieving desired compliance
 }
 
 module "cis" {
@@ -35,6 +35,6 @@ module "cis" {
   enable_security_hub                 = true
   enable_aws_macie                    = true
   mfa_iam_group_name                  = "mfa-group" ## enter your IAM user group for mfa                                                                  ## enter your user group name
-  cloudwatch_logs_kms_key_arn         = "arn:aws:kms:us-east-1:427743860237:key/3116fc04-dbbd-4648-b42e-88e0e2c036db" ## enter kms key id for encrypting cloudwatch log group of cloud trail
+  cloudwatch_logs_kms_key_arn         = "arn:aws:kms:us-east-2:222222222222:key/kms_key_arn" ## enter kms key id for encrypting cloudwatch log group of cloud trail
   cloudwatch_log_group_retention_days = 60
 }
