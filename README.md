@@ -10,6 +10,40 @@ The AWS Security Checks Module is a powerful tool for automating the process of 
 
 For acheiving 100% compliant for AWS Infrastructure we need to perform some manual checks which are listed in the respective directory of cis-levels.
 
+For encrypting cloudwatch log group of cloudtrail please use this KMS key policy. Please change the account id and region.
+
+```
+{
+    "Version": "2012-10-17",
+    "Id": "allow-cloudwatch-logs-encryption",
+    "Statement": [
+        {
+            "Sid": "AllowRootFullPermissions",
+            "Effect": "Allow",
+            "Principal": {
+                "AWS": "arn:aws:iam::12345678:root"
+            },
+            "Action": "kms:*",
+            "Resource": "*"
+        },
+        {
+            "Sid": "AllowCloudWatchLogsEncryption",
+            "Effect": "Allow",
+            "Principal": {
+                "Service": "logs.us-east-2.amazonaws.com"
+            },
+            "Action": [
+                "kms:Encrypt*",
+                "kms:Decrypt*",
+                "kms:ReEncrypt*",
+                "kms:GenerateDataKey*",
+                "kms:Describe*"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
 ## Features
 
 - Pre-configured checks for CIS Level 1, CIS Level 2, and SOC 2 security benchmarks.

@@ -33,7 +33,7 @@ module "cis" {
   remove_ssl_tls_iam                  = false
   enable_guard_duty                   = true
   enable_security_hub                 = true
-  mfa_iam_group_name                  = "" ## enter your IAM user group for mfa                                                                  ## enter your user group name
-  cloudwatch_logs_kms_key_arn         = "" ## enter kms key id for encrypting cloudwatch log group of cloud trail
+  mfa_iam_group_name                  = "mfa-group" ## enter your IAM user group for mfa                                                                  ## enter your user group name
+  cloudwatch_logs_kms_key_arn         = "arn:aws:kms:us-east-2:222222222222:key/kms_key_arn" ## enter kms key id for encrypting cloudwatch log group of cloud trail
   cloudwatch_log_group_retention_days = 60
 }
