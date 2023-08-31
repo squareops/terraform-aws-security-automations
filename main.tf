@@ -26,6 +26,7 @@ module "cis-level-2" {
   sns_topic_arn         = module.cis-level-1.sns_topic_arn
   cloud_watch_log_group = module.cis-level-1.cloudwatch_log_group_id
   config_enabled        = var.config_enabled
+  enable_aws_macie      = var.enable_aws_macie
 }
 
 module "soc2" {

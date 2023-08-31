@@ -221,3 +221,9 @@ variable "cloudwatch_log_group_retention_days" {
   default     = 30
   description = "Enter the number of days in which you want your cloud watch log group for cloudtrail will got expired"
 }
+
+variable "enable_aws_macie" {
+  type        = bool
+  default     = true
+  description = "Enable aws macie"
+}
