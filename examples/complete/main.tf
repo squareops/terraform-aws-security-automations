@@ -26,8 +26,8 @@ module "cis" {
   alerting_enabled                      = true
   multiple_access_key_notification      = true
   multiple_access_key_deactivate        = false
-  disable_unused_credentials            = true
-  disable_unused_credentials_after_days = 2
+  disable_unused_credentials            = false
+  disable_unused_credentials_after_days = 90
   remove_ssl_tls_iam                    = false
   enable_guard_duty                     = true
   enable_security_hub                   = true
