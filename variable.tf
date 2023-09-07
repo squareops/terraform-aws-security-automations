@@ -162,28 +162,10 @@ variable "multiple_access_key_deactivate" {
   description = "It will deactivate the newly created active access key"
 }
 
-variable "notify_unused_cred_90_days" {
-  type        = bool
-  default     = true
-  description = "It will notify unused cred more than 90 days"
-}
-
-variable "disable_unused_cred_90_days" {
+variable "disable_unused_credentials" {
   type        = bool
   default     = false
-  description = "It will deactivate the newly created active access key"
-}
-
-variable "notify_unused_cred_45_days" {
-  type        = bool
-  default     = true
-  description = "It will notify about unused cred more than 45 days."
-}
-
-variable "disable_unused_cred_45_days" {
-  type        = bool
-  default     = false
-  description = "It will disable cred for more than 45 days"
+  description = "It will disable unused credentials of IAM user"
 }
 
 variable "remove_ssl_tls_iam" {
@@ -211,8 +193,8 @@ variable "mfa_iam_group_name" {
 }
 
 variable "check_level" {
-  type        = string
-  default     = ""
+  type        = list(any)
+  default     = []
   description = "CIS level-2 checks deployment"
 }
 
@@ -226,4 +208,10 @@ variable "enable_aws_macie" {
   type        = bool
   default     = true
   description = "Enable aws macie"
+}
+
+variable "disable_unused_credentials_after_days" {
+  type        = number
+  default     = "90"
+  description = "Enter no of days after which unused credentials will be diable"
 }

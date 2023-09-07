@@ -3,9 +3,12 @@ import datetime
 from dateutil.tz import tzutc
 import time
 
+no_of_days = "${disable_unused_credentials_after_days}"
+
 def lambda_handler(event, context):
     iam = boto3.client('iam')
-    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=90)
+    days = int(no_of_days)
+    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=days)
 
     # Lists to store users with unused access keys and users with unused login credentials
     users_with_unused_access_keys = []
