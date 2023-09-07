@@ -86,7 +86,7 @@ module "cis" {
   region                              = "us-east-1"
   email                               = "skaf-demo@squareops.com"
   cron_expression                     = "cron(0 22 1,10,20,28 * ? 2023)"
-  check_level                         = "soc2" ##Enter check level (level-1 or level-2 or soc2)
+  check_level                         = ["level-1", "level-2", "soc2"] ##Enter check level (level-1 or level-2 or soc2)
   s3_enabled                          = true
   config_enabled                      = true
   include_global_resource_types       = true
@@ -94,10 +94,8 @@ module "cis" {
   alerting_enabled                    = true
   multiple_access_key_notification    = true
   multiple_access_key_deactivate      = false
-  disable_unused_cred_90_days         = false
-  notify_unused_cred_90_days          = true
-  notify_unused_cred_45_days          = true
-  disable_unused_cred_45_days         = false
+  disable_unused_credentials            = true
+  disable_unused_credentials_after_days = 90
   remove_ssl_tls_iam                  = false
   enable_guard_duty                   = true
   enable_security_hub                 = true
