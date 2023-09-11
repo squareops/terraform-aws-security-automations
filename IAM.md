@@ -1,3 +1,6 @@
+## IAM Permission
+
+The Policy required to deploy this module:
 ```hcl
 {
     "Version": "2012-10-17",

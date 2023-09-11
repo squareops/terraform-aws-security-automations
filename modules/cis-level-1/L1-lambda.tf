@@ -250,17 +250,20 @@ resource "aws_cloudwatch_event_target" "lambda_target_mfa_user" {
 # 1.3 Ensure credentials unused for 90 days or greater are disabled
 # 1.4 Ensure access keys are rotated every 90 days or less
 data "template_file" "lambda_function_script_user_cred" {
-  count    = var.disable_unused_cred_90_days ? 1 : 0
+  count    = var.disable_unused_credentials ? 1 : 0
   template = file("${path.module}/L1-lambda/1.3_disable_user_cred.py")
+  vars = {
+    disable_unused_credentials_after_days = var.disable_unused_credentials_after_days
+  }
 }
 resource "local_file" "lambda_code_user_cred" {
-  count    = var.disable_unused_cred_90_days ? 1 : 0
+  count    = var.disable_unused_credentials ? 1 : 0
   content  = data.template_file.lambda_function_script_user_cred[0].rendered
   filename = "${path.module}/rendered/user-cred.py"
 }
 
 data "archive_file" "lambda_zip_user_cred" {
-  count       = var.disable_unused_cred_90_days ? 1 : 0
+  count       = var.disable_unused_credentials ? 1 : 0
   depends_on  = [local_file.lambda_code_user_cred]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -268,7 +271,7 @@ data "archive_file" "lambda_zip_user_cred" {
 }
 
 resource "aws_lambda_function" "lambda_function_user_cred" {
-  count            = var.disable_unused_cred_90_days ? 1 : 0
+  count            = var.disable_unused_credentials ? 1 : 0
   filename         = data.archive_file.lambda_zip_user_cred[0].output_path
   function_name    = "user_cred"
   role             = aws_iam_role.lambda_role.arn
@@ -280,7 +283,7 @@ resource "aws_lambda_function" "lambda_function_user_cred" {
 }
 
 resource "aws_lambda_permission" "lambda_permission_user_cred" {
-  count         = var.disable_unused_cred_90_days ? 1 : 0
+  count         = var.disable_unused_credentials ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_user_cred[0].arn
   principal     = "events.amazonaws.com"
@@ -288,14 +291,14 @@ resource "aws_lambda_permission" "lambda_permission_user_cred" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred" {
-  count               = var.disable_unused_cred_90_days ? 1 : 0
+  count               = var.disable_unused_credentials ? 1 : 0
   name                = "lambda_trigger_user_cred"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred" {
-  count     = var.disable_unused_cred_90_days ? 1 : 0
+  count     = var.disable_unused_credentials ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred[0].name
   arn       = aws_lambda_function.lambda_function_user_cred[0].arn
   target_id = "lambda_target_user_cred"
@@ -609,20 +612,21 @@ resource "aws_cloudwatch_event_target" "lambda_target_active_acess_key_enforcing
 ## Ensure unused cred for more than 90 days will be disabled. Below code will send notification of unused credentials.
 
 data "template_file" "lambda_function_script_user_cred_permissive" {
-  count    = var.notify_unused_cred_90_days ? 1 : 0
+  count    = var.disable_unused_credentials ? 1 : 0
   template = file("${path.module}/L1-lambda/1.3_disable_user_cred_permissive.py")
   vars = {
-    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
+    sns_topic_arn                         = aws_sns_topic.trail-unauthorised.arn,
+    disable_unused_credentials_after_days = var.disable_unused_credentials_after_days
   }
 }
 resource "local_file" "lambda_code_user_cred_permissive" {
-  count    = var.notify_unused_cred_90_days ? 1 : 0
+  count    = var.disable_unused_credentials ? 1 : 0
   content  = data.template_file.lambda_function_script_user_cred_permissive[0].rendered
   filename = "${path.module}/rendered/user-cred-permissive.py"
 }
 
 data "archive_file" "lambda_zip_user_cred_permissive" {
-  count       = var.notify_unused_cred_90_days ? 1 : 0
+  count       = var.disable_unused_credentials ? 1 : 0
   depends_on  = [local_file.lambda_code_user_cred_permissive]
   type        = "zip"
   source_dir  = "${path.module}/rendered/"
@@ -630,7 +634,7 @@ data "archive_file" "lambda_zip_user_cred_permissive" {
 }
 
 resource "aws_lambda_function" "lambda_function_user_cred_permissive" {
-  count            = var.notify_unused_cred_90_days ? 1 : 0
+  count            = var.disable_unused_credentials ? 1 : 0
   filename         = data.archive_file.lambda_zip_user_cred_permissive[0].output_path
   function_name    = "user_cred_permissive"
   role             = aws_iam_role.lambda_role.arn
@@ -642,7 +646,7 @@ resource "aws_lambda_function" "lambda_function_user_cred_permissive" {
 }
 
 resource "aws_lambda_permission" "lambda_permission_user_cred_permissive" {
-  count         = var.notify_unused_cred_90_days ? 1 : 0
+  count         = var.disable_unused_credentials ? 1 : 0
   action        = "lambda:InvokeFunction"
   function_name = aws_lambda_function.lambda_function_user_cred_permissive[0].arn
   principal     = "events.amazonaws.com"
@@ -650,128 +654,17 @@ resource "aws_lambda_permission" "lambda_permission_user_cred_permissive" {
 }
 
 resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_permissive" {
-  count               = var.notify_unused_cred_90_days ? 1 : 0
+  count               = var.disable_unused_credentials ? 1 : 0
   name                = "lambda_trigger_user_cred_permissive"
   description         = "Trigger for lambda function"
   schedule_expression = var.cron_expression
 }
 
 resource "aws_cloudwatch_event_target" "lambda_target_user_cred_permissive" {
-  count     = var.notify_unused_cred_90_days ? 1 : 0
+  count     = var.disable_unused_credentials ? 1 : 0
   rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_permissive[0].name
   arn       = aws_lambda_function.lambda_function_user_cred_permissive[0].arn
   target_id = "lambda_target_user_cred_permissive"
-}
-
-## Ensure unused cred for more than 45 days will be disabled. Below code will send notification of unused credentials.
-
-data "template_file" "lambda_function_script_user_cred_45_days" {
-  count    = var.notify_unused_cred_45_days ? 1 : 0
-  template = file("${path.module}/L1-lambda/1.12_notify_unused_cred_45_days.py")
-  vars = {
-    sns_topic_arn = aws_sns_topic.trail-unauthorised.arn,
-  }
-}
-resource "local_file" "lambda_code_user_cred_45_days" {
-  count    = var.notify_unused_cred_45_days ? 1 : 0
-  content  = data.template_file.lambda_function_script_user_cred_45_days[0].rendered
-  filename = "${path.module}/rendered/user-cred-45-days.py"
-}
-
-data "archive_file" "lambda_zip_user_cred_45_days" {
-  count       = var.notify_unused_cred_45_days ? 1 : 0
-  depends_on  = [local_file.lambda_code_user_cred_45_days]
-  type        = "zip"
-  source_dir  = "${path.module}/rendered/"
-  output_path = "${path.module}/lambda_user_cred_45_days.zip"
-}
-
-resource "aws_lambda_function" "lambda_function_user_cred_45_days" {
-  count            = var.notify_unused_cred_45_days ? 1 : 0
-  filename         = data.archive_file.lambda_zip_user_cred_45_days[0].output_path
-  function_name    = "user_cred_45_days"
-  role             = aws_iam_role.lambda_role.arn
-  handler          = "user-cred-45-days.lambda_handler"
-  source_code_hash = data.archive_file.lambda_zip_user_cred_45_days[0].output_base64sha256
-  runtime          = "python3.9"
-  timeout          = 300
-  memory_size      = 256
-}
-
-resource "aws_lambda_permission" "lambda_permission_user_cred_45_days" {
-  count         = var.notify_unused_cred_45_days ? 1 : 0
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function_user_cred_45_days[0].arn
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days[0].arn
-}
-
-resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_45_days" {
-  count               = var.notify_unused_cred_45_days ? 1 : 0
-  name                = "lambda_trigger_user_cred_45_days"
-  description         = "Trigger for lambda function"
-  schedule_expression = var.cron_expression
-}
-
-resource "aws_cloudwatch_event_target" "lambda_target_user_cred_45_days" {
-  count     = var.notify_unused_cred_45_days ? 1 : 0
-  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days[0].name
-  arn       = aws_lambda_function.lambda_function_user_cred_45_days[0].arn
-  target_id = "lambda_target_user_cred_45_days"
-}
-
-## Ensure unused cred for more than 45 days will be disabled.
-
-data "template_file" "lambda_function_script_user_cred_45_days_disable" {
-  count    = var.disable_unused_cred_45_days ? 1 : 0
-  template = file("${path.module}/L1-lambda/1.12_disable_user_cred_45_days.py")
-}
-resource "local_file" "lambda_code_user_cred_45_days_disable" {
-  count    = var.disable_unused_cred_45_days ? 1 : 0
-  content  = data.template_file.lambda_function_script_user_cred_45_days_disable[0].rendered
-  filename = "${path.module}/rendered/user-cred-45-days-disable.py"
-}
-
-data "archive_file" "lambda_zip_user_cred_45_days_disable" {
-  count       = var.disable_unused_cred_45_days ? 1 : 0
-  depends_on  = [local_file.lambda_code_user_cred_45_days_disable]
-  type        = "zip"
-  source_dir  = "${path.module}/rendered/"
-  output_path = "${path.module}/lambda_user_cred_45_days_disable.zip"
-}
-
-resource "aws_lambda_function" "lambda_function_user_cred_45_days_disable" {
-  count            = var.disable_unused_cred_45_days ? 1 : 0
-  filename         = data.archive_file.lambda_zip_user_cred_45_days_disable[0].output_path
-  function_name    = "user_cred_45_days_disable"
-  role             = aws_iam_role.lambda_role.arn
-  handler          = "user-cred-45-days-disable.lambda_handler"
-  source_code_hash = data.archive_file.lambda_zip_user_cred_45_days_disable[0].output_base64sha256
-  runtime          = "python3.9"
-  timeout          = 300
-  memory_size      = 256
-}
-
-resource "aws_lambda_permission" "lambda_permission_user_cred_45_days_disable" {
-  count         = var.disable_unused_cred_45_days ? 1 : 0
-  action        = "lambda:InvokeFunction"
-  function_name = aws_lambda_function.lambda_function_user_cred_45_days_disable[0].arn
-  principal     = "events.amazonaws.com"
-  source_arn    = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days_disable[0].arn
-}
-
-resource "aws_cloudwatch_event_rule" "lambda_trigger_user_cred_45_days_disable" {
-  count               = var.disable_unused_cred_45_days ? 1 : 0
-  name                = "lambda_trigger_user_cred_45_days_disable"
-  description         = "Trigger for lambda function"
-  schedule_expression = var.cron_expression
-}
-
-resource "aws_cloudwatch_event_target" "lambda_target_user_cred_45_days_disable" {
-  count     = var.disable_unused_cred_45_days ? 1 : 0
-  rule      = aws_cloudwatch_event_rule.lambda_trigger_user_cred_45_days_disable[0].name
-  arn       = aws_lambda_function.lambda_function_user_cred_45_days_disable[0].arn
-  target_id = "lambda_target_user_cred_45_days_disable"
 }
 
 ## Ensure that IAM Access analyzer is enabled for all regions

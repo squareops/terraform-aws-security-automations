@@ -3,9 +3,12 @@ import datetime
 from dateutil.tz import tzutc
 import time
 
+no_of_days = "${disable_unused_credentials_after_days}"
+
 def lambda_handler(event, context):
     iam = boto3.client('iam')
-    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=90)
+    days = int(no_of_days)
+    cutoff_date = datetime.datetime.now(tzutc()) - datetime.timedelta(days=days)
 
     users = iam.list_users()['Users']
     for user in users:

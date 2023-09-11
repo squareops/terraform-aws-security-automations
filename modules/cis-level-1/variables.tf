@@ -148,30 +148,6 @@ variable "multiple_access_key_deactivate" {
   description = "It will deactivate the newly created active access key"
 }
 
-variable "notify_unused_cred_90_days" {
-  type        = bool
-  default     = true
-  description = "It will notify unused cred more than 90 days"
-}
-
-variable "disable_unused_cred_90_days" {
-  type        = bool
-  default     = false
-  description = "It will deactivate the newly created active access key"
-}
-
-variable "notify_unused_cred_45_days" {
-  type        = bool
-  default     = true
-  description = "It will notify about unused cred more than 45 days."
-}
-
-variable "disable_unused_cred_45_days" {
-  type        = bool
-  default     = false
-  description = "It will disable cred for more than 45 days"
-}
-
 variable "remove_ssl_tls_iam" {
   type        = bool
   default     = false
@@ -188,4 +164,16 @@ variable "cloudwatch_log_group_retention_days" {
   type        = number
   default     = 30
   description = "Enter the number of days in which you want your cloud watch log group for cloudtrail will got expired"
+}
+
+variable "disable_unused_credentials_after_days" {
+  type        = number
+  default     = "90"
+  description = "Enter no of days after which unused credentials will be disable"
+}
+
+variable "disable_unused_credentials" {
+  type        = bool
+  default     = false
+  description = "It will disable unused credentials of IAM user"
 }
