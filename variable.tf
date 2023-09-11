@@ -1,38 +1,38 @@
 variable "name" {
   type        = string
   default     = ""
-  description = "Prefix for all the resources"
+  description = "Prefix for all resources (e.g., 'my-app') to identify them in the cloud environment."
 }
 
 variable "email" {
   type        = string
   default     = ""
-  description = "Email address that can receive notifications from Amazon SNS"
+  description = "Email address for receiving notifications from Amazon SNS."
 }
 
 variable "cron_expression" {
   type        = string
   default     = "cron(0 22 1,10,20,28 * ? 2023)"
-  description = "Expession to trigger lambda function regularly on the schedule"
+  description = "Cron expression to trigger a Lambda function on a regular schedule."
 }
 # S3
 variable "s3_enabled" {
   type        = bool
   default     = true
-  description = "Set it true to export logs of CloudTrail to S3 Bucket"
+  description = "Set to true to enable exporting CloudTrail logs to an S3 bucket."
 }
 
 variable "audit_log_bucket_custom_policy_json" {
   type        = string
   default     = ""
-  description = "Override cusom policy for S3 Logging bucket"
+  description = "Override the custom policy for the S3 logging bucket (JSON format)."
 }
 
 #AWS Config
 variable "config_enabled" {
   type        = bool
   default     = true
-  description = "Set it to true to enable AWS Config"
+  description = "Set to true to enable AWS Config."
 }
 
 variable "include_global_resource_types" {
@@ -64,7 +64,7 @@ variable "cloudtrail_event_selector_type" {
 variable "region" {
   type        = string
   default     = "us-east-2"
-  description = "AWS Region"
+  description = "AWS region where resources will be provisioned."
 }
 
 variable "cloudtrail_kms_policy" {
@@ -83,7 +83,7 @@ variable "alerting_enabled" {
 variable "alarm_namespace" {
   type        = string
   default     = "CISBenchmark"
-  description = "Namespace for CloudWatch Alarm Metric"
+  description = "Namespace for the CloudWatch Alarm Metric"
 }
 
 variable "tags" {
@@ -105,7 +105,7 @@ variable "iam_allow_users_to_change_password" {
 variable "iam_hard_expiry" {
   type        = bool
   default     = true
-  description = "Everyone needs hard reset for expired passwords"
+  description = "Set it true to enforce hard password expiration for all users."
 }
 
 variable "iam_require_uppercase_characters" {
@@ -135,83 +135,83 @@ variable "iam_require_numbers" {
 variable "iam_minimum_password_length" {
   type        = number
   default     = 14
-  description = "Require minimum length of password"
+  description = "Minimum length requirement for user passwords."
 }
 
 variable "iam_password_reuse_prevention" {
   type        = number
   default     = 24
-  description = "Prevent password reuse N times"
+  description = "Prevent password reuse multiple times"
 }
 
 variable "iam_max_password_age" {
   type        = number
   default     = 90
-  description = "Passwords expire in N days"
+  description = "Maximum password age in days before expiration."
 }
 
 variable "multiple_access_key_notification" {
   type        = bool
   default     = true
-  description = "It will send email notification of IAM user with multiple active access key "
+  description = "Send email notifications for IAM users with multiple active access keys. "
 }
 
 variable "multiple_access_key_deactivate" {
   type        = bool
   default     = false
-  description = "It will deactivate the newly created active access key"
+  description = "Deactivate newly created active access keys for IAM users."
 }
 
 variable "disable_unused_credentials" {
   type        = bool
   default     = false
-  description = "It will disable unused credentials of IAM user"
+  description = "Disable unused IAM user credentials."
 }
 
 variable "remove_ssl_tls_iam" {
   type        = bool
   default     = false
-  description = "Remove expire ssl tls cert from IAM"
+  description = "Remove expired SSL/TLS certificates from IAM."
 }
 
 variable "enable_guard_duty" {
   type        = bool
   default     = true
-  description = "This will enable guard duty"
+  description = "Enable AWS GuardDuty for threat detection."
 }
 
 variable "enable_security_hub" {
   type        = bool
   default     = true
-  description = "This will security hub"
+  description = "Enable AWS Security Hub for centralized security monitoring."
 }
 
 variable "mfa_iam_group_name" {
   type        = string
   default     = "test-user-group"
-  description = "Enter the user group name in which you want to add mfa user policy"
+  description = "Name of the IAM user group to which MFA user policies will be added."
 }
 
 variable "check_level" {
   type        = list(any)
   default     = []
-  description = "CIS level-2 checks deployment"
+  description = "List of CIS checks to deploy."
 }
 
 variable "cloudwatch_log_group_retention_days" {
   type        = number
   default     = 30
-  description = "Enter the number of days in which you want your cloud watch log group for cloudtrail will got expired"
+  description = "Number of days to retain logs in CloudWatch log groups for CloudTrail."
 }
 
 variable "enable_aws_macie" {
   type        = bool
   default     = true
-  description = "Enable aws macie"
+  description = "Enable AWS Macie for data discovery and protection."
 }
 
 variable "disable_unused_credentials_after_days" {
   type        = number
   default     = "90"
-  description = "Enter no of days after which unused credentials will be diable"
+  description = "Number of days after which unused IAM credentials will be disabled."
 }
