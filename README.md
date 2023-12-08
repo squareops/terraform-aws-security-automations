@@ -66,7 +66,7 @@ Each folder contains configuration files specific to the corresponding security 
 
 To get started with the AWS Security Checks Module, follow these steps:
 
-1. Clone the repository to your local machine: `git clone https://sq-ia//terraform-aws-cis-level1.git`
+1. Clone the repository to your local machine: `https://github.com/sq-ia/terraform-aws-infrasec`
 2. Navigate to the desired framework folder (`cis-level-1`, `cis-level-2`, or `soc2`).
 3. Review the documentation for each check to understand its purpose and requirements.
 
@@ -103,6 +103,7 @@ module "cis" {
   mfa_iam_group_name                    = "mfa-group" ## enter your IAM user group for mfa
   cloudwatch_logs_kms_key_arn           = "arn:aws:kms:us-east-2:222222222222:key/kms_key_arn" ## enter kms key arn for encrypting cloudwatch log group of cloud trail
   cloudwatch_log_group_retention_days   = 60
+  s3_object_expiration_days             = 90
 }
 
 ```
@@ -172,6 +173,7 @@ module "cis" {
 | <a name="input_region"></a> [region](#input\_region) | AWS region where resources will be provisioned. | `string` | `"us-east-2"` | no |
 | <a name="input_remove_ssl_tls_iam"></a> [remove\_ssl\_tls\_iam](#input\_remove\_ssl\_tls\_iam) | Remove expired SSL/TLS certificates from IAM. | `bool` | `false` | no |
 | <a name="input_s3_enabled"></a> [s3\_enabled](#input\_s3\_enabled) | Set to true to enable exporting CloudTrail logs to an S3 bucket. | `bool` | `true` | no |
+| <a name="input_s3_object_expiration_days"></a> [s3\_object\_expiration\_days](#input\_s3\_object\_expiration\_days) | Number of days after which object of s3 expires. | `number` | `"90"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to be used in all the resources | `map(string)` | <pre>{<br>  "key": "AWS_CIS_Benchmark",<br>  "value": "1.2.0"<br>}</pre> | no |
 
 ## Outputs
@@ -189,7 +191,7 @@ module "cis" {
 
 To report an issue with a project:
 
-  1. Check the repository's [issue tracker](https://github.com/sq-ia/terraform-aws-cis-level1/issues) on GitHub
+  1. Check the repository's [issue tracker](https://github.com/sq-ia/terraform-aws-infrasec/issues) on GitHub
   2. Search to see if the issue has already been reported
   3. If you can't find an answer to your question in the documentation or issue tracker, you can ask a question by creating a new issue. Be sure to provide enough context and details so others can understand your problem.
 
@@ -201,7 +203,7 @@ Apache License, Version 2.0, January 2004 (http://www.apache.org/licenses/).
 
 To support a GitHub project by liking it, you can follow these steps:
 
-  1. Visit the repository: Navigate to the [GitHub repository](https://github.com/sq-ia/terraform-aws-cis-level1).
+  1. Visit the repository: Navigate to the [GitHub repository](https://github.com/sq-ia/terraform-aws-infrasec).
 
   2. Click the "Star" button: On the repository page, you'll see a "Star" button in the upper right corner. Clicking on it will star the repository, indicating your support for the project.
 
