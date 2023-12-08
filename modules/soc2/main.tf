@@ -113,7 +113,7 @@ resource "aws_s3_bucket_lifecycle_configuration" "bucket-config" {
   rule {
     id = "guardduty_s3"
     expiration {
-      days = var.s3_object_expiration
+      days = var.s3_object_expiration_days
     }
     status = "Enabled"
   }

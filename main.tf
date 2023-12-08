@@ -30,12 +30,12 @@ module "cis-level-2" {
 }
 
 module "soc2" {
-  source               = "./modules/soc2"
-  depends_on           = [module.cis-level-2]
-  count                = contains(var.check_level, "soc2") ? 1 : 0
-  region               = data.aws_region.current.name
-  name                 = var.name
-  enable_guard_duty    = var.enable_guard_duty
-  enable_security_hub  = var.enable_security_hub
-  s3_object_expiration = var.s3_object_expiration_days
+  source                    = "./modules/soc2"
+  depends_on                = [module.cis-level-2]
+  count                     = contains(var.check_level, "soc2") ? 1 : 0
+  region                    = data.aws_region.current.name
+  name                      = var.name
+  enable_guard_duty         = var.enable_guard_duty
+  enable_security_hub       = var.enable_security_hub
+  s3_object_expiration_days = var.s3_object_expiration_days
 }

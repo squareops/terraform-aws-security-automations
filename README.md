@@ -172,6 +172,7 @@ module "cis" {
 | <a name="input_region"></a> [region](#input\_region) | AWS region where resources will be provisioned. | `string` | `"us-east-2"` | no |
 | <a name="input_remove_ssl_tls_iam"></a> [remove\_ssl\_tls\_iam](#input\_remove\_ssl\_tls\_iam) | Remove expired SSL/TLS certificates from IAM. | `bool` | `false` | no |
 | <a name="input_s3_enabled"></a> [s3\_enabled](#input\_s3\_enabled) | Set to true to enable exporting CloudTrail logs to an S3 bucket. | `bool` | `true` | no |
+| <a name="input_s3_object_expiration_days"></a> [s3\_object\_expiration\_days](#input\_s3\_object\_expiration\_days) | Number of days after which object of s3 expires. | `number` | `"90"` | no |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags to be used in all the resources | `map(string)` | <pre>{<br>  "key": "AWS_CIS_Benchmark",<br>  "value": "1.2.0"<br>}</pre> | no |
 
 ## Outputs

@@ -219,5 +219,5 @@ variable "disable_unused_credentials_after_days" {
 variable "s3_object_expiration_days" {
   type        = number
   default     = "90"
-  description = "Number of days after which object expires."
+  description = "Number of days after which object of s3 expires."
 }

@@ -19,11 +19,12 @@ variable "enable_guard_duty" {
 variable "enable_security_hub" {
   type        = bool
   default     = true
-  description = "This will security hub"
+  description = "This will enable security hub"
 }
 
-variable "s3_object_expiration" {
+variable "s3_object_expiration_days" {
   type        = string
   default     = "90"
-  description = "This will set gaurd duty s3 expiration"
+  description = "Number of days after which object of s3 expires"
+
 }
