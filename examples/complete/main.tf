@@ -35,4 +35,5 @@ module "cis" {
   mfa_iam_group_name                    = "mfa-group"                                       ## enter your IAM user group for mfa
   cloudwatch_logs_kms_key_arn           = "arn:aws:kms:us-east-1:123456:key/3116fc04-dbbd-" ## enter kms key arn for encrypting cloudwatch log group of cloud trail
   cloudwatch_log_group_retention_days   = 60
+  s3_object_expiration_days             = 90
 }

@@ -108,6 +108,17 @@ resource "aws_s3_bucket" "gd_bucket" {
   force_destroy = true
 }
 
+resource "aws_s3_bucket_lifecycle_configuration" "bucket-config" {
+  bucket = aws_s3_bucket.gd_bucket[0].id
+  rule {
+    id = "guardduty_s3"
+    expiration {
+      days = var.s3_object_expiration_days
+    }
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_policy" "gd_bucket_policy" {
   count  = var.enable_guard_duty ? 1 : 0
   bucket = aws_s3_bucket.gd_bucket[0].id
