@@ -66,7 +66,7 @@ Each folder contains configuration files specific to the corresponding security 
 
 To get started with the AWS Security Checks Module, follow these steps:
 
-1. Clone the repository to your local machine: `git clone https://sq-ia//terraform-aws-cis-level1.git`
+1. Clone the repository to your local machine: `https://github.com/sq-ia/terraform-aws-infrasec`
 2. Navigate to the desired framework folder (`cis-level-1`, `cis-level-2`, or `soc2`).
 3. Review the documentation for each check to understand its purpose and requirements.
 
