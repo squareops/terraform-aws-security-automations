@@ -21,3 +21,9 @@ variable "enable_security_hub" {
   default     = true
   description = "This will security hub"
 }
+
+variable "s3_object_expiration" {
+  type        = string
+  default     = "90"
+  description = "This will set gaurd duty s3 expiration"
+}
