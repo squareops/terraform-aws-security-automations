@@ -1,6 +1,6 @@
 locals {
-  region      = "us-east-1"
-  environment = "prod"
+  region      = ""
+  environment = ""
   name        = "skaf"
   additional_tags = {
     Owner      = "organization_name"
