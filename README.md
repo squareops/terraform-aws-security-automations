@@ -80,7 +80,8 @@ The `examples` folder contains terraform code to call compliance checks based on
 
 module "cis" {
 
-  source = "../../"
+  source                                = "squareops/security-automations/aws"
+  version                               = "1.0.1"
 
   name                                  = local.name
   region                                = local.region
