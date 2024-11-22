@@ -13,7 +13,7 @@ No providers.
 
 | Name | Source | Version |
 |------|--------|---------|
-| <a name="module_cis"></a> [cis](#module\_cis) | ../../ | n/a |
+| <a name="module_cis"></a> [cis](#module\_cis) | squareops/security-automations/aws | n/a |
 
 ## Resources
 
