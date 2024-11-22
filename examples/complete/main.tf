@@ -1,6 +1,6 @@
 locals {
-  region      = "us-east-1"
-  environment = "prod"
+  region      = ""
+  environment = ""
   name        = "skaf"
   additional_tags = {
     Owner      = "organization_name"
@@ -12,8 +12,8 @@ locals {
 
 module "cis" {
 
-  source = "../../"
-
+  source                                = "squareops/security-automations/aws"
+  version                               = "1.0.1"
   name                                  = local.name
   region                                = local.region
   email                                 = "skaf-demo@squareops.com"
